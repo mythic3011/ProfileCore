@@ -14,4 +14,5 @@ pub mod env;
 pub mod text;
 pub mod process;
 pub mod archive;
+pub mod string;
 

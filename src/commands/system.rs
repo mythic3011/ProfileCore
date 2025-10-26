@@ -1,6 +1,6 @@
 //! System information commands (using sysinfo library)
 
-use sysinfo::{System, Disks};
+use sysinfo::{System, Disks, Networks, Components};
 use comfy_table::{Table, presets::UTF8_FULL, Cell, Color};
 use colored::Colorize;
 
@@ -280,5 +280,100 @@ mod tests {
         // Should serialize without error
         assert!(serde_json::to_string(&json).is_ok());
     }
+}
+
+pub fn load() {
+    println!("\n{}", "System Load Average".cyan().bold());
+    println!("{}", "=".repeat(60));
+    
+    let load_avg = System::load_average();
+    
+    println!("1 minute:  {:.2}", load_avg.one);
+    println!("5 minutes: {:.2}", load_avg.five);
+    println!("15 minutes: {:.2}", load_avg.fifteen);
+    
+    println!();
+}
+
+pub fn network_stats() {
+    let mut sys = System::new_all();
+    sys.refresh_all();
+    
+    println!("\n{}", "Network Statistics".cyan().bold());
+    println!("{}", "=".repeat(80));
+    
+    let networks = sysinfo::Networks::new_with_refreshed_list();
+    
+    let mut table = Table::new();
+    table.load_preset(UTF8_FULL);
+    table.set_header(vec![
+        Cell::new("Interface").fg(Color::Cyan),
+        Cell::new("Received (bytes)").fg(Color::Cyan),
+        Cell::new("Transmitted (bytes)").fg(Color::Cyan),
+        Cell::new("Packets In").fg(Color::Cyan),
+        Cell::new("Packets Out").fg(Color::Cyan),
+        Cell::new("Errors In").fg(Color::Cyan),
+        Cell::new("Errors Out").fg(Color::Cyan),
+    ]);
+    
+    for (interface_name, network) in &networks {
+        table.add_row(vec![
+            Cell::new(interface_name),
+            Cell::new(network.total_received().to_string()),
+            Cell::new(network.total_transmitted().to_string()),
+            Cell::new(network.total_packets_received().to_string()),
+            Cell::new(network.total_packets_transmitted().to_string()),
+            Cell::new(network.total_errors_on_received().to_string()),
+            Cell::new(network.total_errors_on_transmitted().to_string()),
+        ]);
+    }
+    
+    println!("{}\n", table);
+}
+
+pub fn temperature() {
+    println!("\n{}", "System Temperature Sensors".cyan().bold());
+    println!("{}", "=".repeat(60));
+    
+    let components = sysinfo::Components::new_with_refreshed_list();
+    
+    if components.is_empty() {
+        println!("{} No temperature sensors found", "!".yellow());
+        println!("Note: Temperature monitoring may require elevated privileges");
+        println!();
+        return;
+    }
+    
+    let mut table = Table::new();
+    table.load_preset(UTF8_FULL);
+    table.set_header(vec![
+        Cell::new("Component").fg(Color::Cyan),
+        Cell::new("Temperature").fg(Color::Cyan),
+        Cell::new("Max").fg(Color::Cyan),
+        Cell::new("Critical").fg(Color::Cyan),
+    ]);
+    
+    for component in &components {
+        let temp = component.temperature();
+        let max = component.max();
+        let critical = component.critical();
+        
+        let temp_cell = if critical.is_some() && temp >= critical.unwrap() {
+            Cell::new(format!("{:.1}°C", temp)).fg(Color::Red)
+        } else if max > 0.0 && temp >= max * 0.9 {
+            Cell::new(format!("{:.1}°C", temp)).fg(Color::Yellow)
+        } else {
+            Cell::new(format!("{:.1}°C", temp)).fg(Color::Green)
+        };
+        
+        table.add_row(vec![
+            Cell::new(component.label().to_string()),
+            temp_cell,
+            Cell::new(if max > 0.0 { format!("{:.1}°C", max) } else { "N/A".to_string() }),
+            Cell::new(if let Some(c) = critical { format!("{:.1}°C", c) } else { "N/A".to_string() }),
+        ]);
+    }
+    
+    println!("{}\n", table);
 }
 

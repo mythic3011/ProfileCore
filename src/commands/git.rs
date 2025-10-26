@@ -551,3 +551,191 @@ pub fn remote() {
     println!("{}\n", table);
 }
 
+pub fn clone(url: &str, path: Option<&str>) {
+    println!("\n{} {}", "Cloning repository:".cyan().bold(), url.yellow());
+    println!("{}", "=".repeat(60));
+    
+    let repo_result = if let Some(target_path) = path {
+        git2::Repository::clone(url, target_path)
+    } else {
+        // Extract repo name from URL
+        let repo_name = url.rsplit('/').next()
+            .unwrap_or("repo")
+            .trim_end_matches(".git");
+        git2::Repository::clone(url, repo_name)
+    };
+    
+    match repo_result {
+        Ok(repo) => {
+            let path = repo.path().parent().unwrap_or(repo.path());
+            println!("{} Repository cloned successfully", "✓".green());
+            println!("Location: {}", path.display().to_string().cyan());
+        }
+        Err(e) => {
+            eprintln!("{} Clone failed: {}", "✗".red(), e);
+        }
+    }
+    
+    println!();
+}
+
+pub fn pull() {
+    let current_dir = match env::current_dir() {
+        Ok(dir) => dir,
+        Err(e) => {
+            eprintln!("{} Failed to get current directory: {}", "✗".red(), e);
+            return;
+        }
+    };
+    
+    let repo = match git2::Repository::open(&current_dir) {
+        Ok(r) => r,
+        Err(e) => {
+            eprintln!("{} Not a git repository: {}", "✗".red(), e);
+            return;
+        }
+    };
+    
+    println!("\n{}", "Pulling from remote...".cyan().bold());
+    println!("{}", "=".repeat(60));
+    
+    // Get current branch
+    let head = match repo.head() {
+        Ok(h) => h,
+        Err(e) => {
+            eprintln!("{} Failed to get HEAD: {}", "✗".red(), e);
+            return;
+        }
+    };
+    
+    let branch_name = match head.shorthand() {
+        Some(name) => name,
+        None => {
+            eprintln!("{} Could not determine branch name", "✗".red());
+            return;
+        }
+    };
+    
+    println!("Branch: {}", branch_name.cyan());
+    
+    // For simplicity, we'll call git pull via command
+    match std::process::Command::new("git")
+        .args(&["pull"])
+        .status()
+    {
+        Ok(status) => {
+            if status.success() {
+                println!("{} Pull completed successfully", "✓".green());
+            } else {
+                eprintln!("{} Pull failed", "✗".red());
+            }
+        }
+        Err(e) => {
+            eprintln!("{} Failed to execute git pull: {}", "✗".red(), e);
+        }
+    }
+    
+    println!();
+}
+
+pub fn push(remote: Option<&str>, branch: Option<&str>) {
+    let current_dir = match env::current_dir() {
+        Ok(dir) => dir,
+        Err(e) => {
+            eprintln!("{} Failed to get current directory: {}", "✗".red(), e);
+            return;
+        }
+    };
+    
+    let repo = match git2::Repository::open(&current_dir) {
+        Ok(r) => r,
+        Err(e) => {
+            eprintln!("{} Not a git repository: {}", "✗".red(), e);
+            return;
+        }
+    };
+    
+    println!("\n{}", "Pushing to remote...".cyan().bold());
+    println!("{}", "=".repeat(60));
+    
+    let remote_name = remote.unwrap_or("origin");
+    
+    // Get current branch if not specified
+    let branch_name = if let Some(b) = branch {
+        b.to_string()
+    } else {
+        match repo.head() {
+            Ok(head) => {
+                match head.shorthand() {
+                    Some(name) => name.to_string(),
+                    None => {
+                        eprintln!("{} Could not determine branch name", "✗".red());
+                        return;
+                    }
+                }
+            }
+            Err(e) => {
+                eprintln!("{} Failed to get HEAD: {}", "✗".red(), e);
+                return;
+            }
+        }
+    };
+    
+    println!("Remote: {}", remote_name.cyan());
+    println!("Branch: {}", branch_name.cyan());
+    
+    // Use command line git for push (auth is complex with git2)
+    match std::process::Command::new("git")
+        .args(&["push", remote_name, &branch_name])
+        .status()
+    {
+        Ok(status) => {
+            if status.success() {
+                println!("{} Push completed successfully", "✓".green());
+            } else {
+                eprintln!("{} Push failed", "✗".red());
+            }
+        }
+        Err(e) => {
+            eprintln!("{} Failed to execute git push: {}", "✗".red(), e);
+        }
+    }
+    
+    println!();
+}
+
+pub fn stash(action: &str) {
+    println!("\n{} {}", "Git stash:".cyan().bold(), action.yellow());
+    println!("{}", "=".repeat(60));
+    
+    let args = match action {
+        "save" | "push" => vec!["stash", "push"],
+        "pop" => vec!["stash", "pop"],
+        "list" => vec!["stash", "list"],
+        "clear" => vec!["stash", "clear"],
+        _ => {
+            eprintln!("{} Unknown stash action: {}", "✗".red(), action);
+            eprintln!("Valid actions: save, pop, list, clear");
+            return;
+        }
+    };
+    
+    match std::process::Command::new("git")
+        .args(&args)
+        .status()
+    {
+        Ok(status) => {
+            if status.success() {
+                println!("{} Stash {} completed", "✓".green(), action);
+            } else {
+                eprintln!("{} Stash {} failed", "✗".red(), action);
+            }
+        }
+        Err(e) => {
+            eprintln!("{} Failed to execute git stash: {}", "✗".red(), e);
+        }
+    }
+    
+    println!();
+}
+

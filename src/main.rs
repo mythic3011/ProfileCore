@@ -65,6 +65,9 @@ enum Command {
     #[options(help = "archive operations")]
     Archive(ArchiveOpts),
     
+    #[options(help = "string utility commands")]
+    String(StringOpts),
+    
     #[options(help = "uninstall legacy v6.0.0 PowerShell modules")]
     UninstallLegacy(UninstallOpts),
 }
@@ -115,6 +118,15 @@ enum SystemCmd {
     
     #[options(help = "show CPU information")]
     Cpu(CpuOpts),
+    
+    #[options(help = "show system load average")]
+    Load(LoadOpts),
+    
+    #[options(help = "show network statistics")]
+    NetworkStats(NetworkStatsOpts),
+    
+    #[options(help = "show temperature sensors")]
+    Temperature(TemperatureOpts),
 }
 
 #[derive(Options)]
@@ -155,6 +167,24 @@ struct MemoryOpts {
 
 #[derive(Options)]
 struct CpuOpts {
+    #[options(help = "show help")]
+    help: bool,
+}
+
+#[derive(Options)]
+struct LoadOpts {
+    #[options(help = "show help")]
+    help: bool,
+}
+
+#[derive(Options)]
+struct NetworkStatsOpts {
+    #[options(help = "show help")]
+    help: bool,
+}
+
+#[derive(Options)]
+struct TemperatureOpts {
     #[options(help = "show help")]
     help: bool,
 }
@@ -307,6 +337,18 @@ enum GitCmd {
     
     #[options(help = "show current git identity")]
     Whoami(WhoamiOpts),
+    
+    #[options(help = "clone a repository")]
+    Clone(CloneOpts),
+    
+    #[options(help = "pull from remote")]
+    Pull(PullOpts),
+    
+    #[options(help = "push to remote")]
+    Push(PushOpts),
+    
+    #[options(help = "stash changes")]
+    Stash(StashOpts),
 }
 
 #[derive(Options)]
@@ -379,6 +421,42 @@ struct ListAccountsOpts {
 struct WhoamiOpts {
     #[options(help = "show help")]
     help: bool,
+}
+
+#[derive(Options)]
+struct CloneOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "repository URL and optional path")]
+    args: Vec<String>,
+}
+
+#[derive(Options)]
+struct PullOpts {
+    #[options(help = "show help")]
+    help: bool,
+}
+
+#[derive(Options)]
+struct PushOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(help = "remote name", meta = "REMOTE")]
+    remote: Option<String>,
+    
+    #[options(help = "branch name", meta = "BRANCH")]
+    branch: Option<String>,
+}
+
+#[derive(Options)]
+struct StashOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "stash action: save, pop, list, clear")]
+    action: Option<String>,
 }
 
 #[derive(Options)]
@@ -874,6 +952,63 @@ struct ArchiveListOpts {
 }
 
 #[derive(Options)]
+struct StringOpts {
+    #[options(help = "show help for string")]
+    help: bool,
+    
+    #[options(command)]
+    command: Option<StringCmd>,
+}
+
+#[derive(Options)]
+enum StringCmd {
+    #[options(help = "base64 encode/decode")]
+    Base64(Base64Opts),
+    
+    #[options(help = "URL encode/decode")]
+    UrlEncode(UrlEncodeOpts),
+    
+    #[options(help = "hash string")]
+    Hash(StringHashOpts),
+}
+
+#[derive(Options)]
+struct Base64Opts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "input string")]
+    input: String,
+    
+    #[options(help = "decode instead of encode", short = "d")]
+    decode: bool,
+}
+
+#[derive(Options)]
+struct UrlEncodeOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "input string")]
+    input: String,
+    
+    #[options(help = "decode instead of encode", short = "d")]
+    decode: bool,
+}
+
+#[derive(Options)]
+struct StringHashOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "input string")]
+    input: String,
+    
+    #[options(help = "hash algorithm: md5, sha256, all", default = "sha256", meta = "ALG")]
+    algorithm: String,
+}
+
+#[derive(Options)]
 struct UninstallOpts {
     #[options(help = "show help")]
     help: bool,
@@ -914,7 +1049,7 @@ fn main() {
         Command::System(opts) => {
             if opts.help {
                 println!("Usage: profilecore system <command>");
-                println!("Commands: info, uptime, processes, disk-usage, memory, cpu");
+                println!("Commands: info, uptime, processes, disk-usage, memory, cpu, load, network-stats, temperature");
                 return;
             }
             
@@ -936,6 +1071,15 @@ fn main() {
                 }
                 Some(SystemCmd::Cpu(_)) => {
                     commands::system::cpu();
+                }
+                Some(SystemCmd::Load(_)) => {
+                    commands::system::load();
+                }
+                Some(SystemCmd::NetworkStats(_)) => {
+                    commands::system::network_stats();
+                }
+                Some(SystemCmd::Temperature(_)) => {
+                    commands::system::temperature();
                 }
                 None => {
                     eprintln!("Error: No system command specified");
@@ -987,7 +1131,7 @@ fn main() {
         Command::Git(opts) => {
             if opts.help {
                 println!("Usage: profilecore git <command>");
-                println!("Commands: status, log, diff, branch, remote, switch-account, add-account, list-accounts, whoami");
+                println!("Commands: status, log, diff, branch, remote, switch-account, add-account, list-accounts, whoami, clone, pull, push, stash");
                 return;
             }
             
@@ -1018,6 +1162,32 @@ fn main() {
                 }
                 Some(GitCmd::Whoami(_)) => {
                     commands::git::whoami();
+                }
+                Some(GitCmd::Clone(clone_opts)) => {
+                    if clone_opts.args.is_empty() {
+                        eprintln!("Error: clone requires repository URL");
+                        eprintln!("Usage: profilecore git clone <url> [path]");
+                        process::exit(1);
+                    }
+                    let path = if clone_opts.args.len() > 1 {
+                        Some(clone_opts.args[1].as_str())
+                    } else {
+                        None
+                    };
+                    commands::git::clone(&clone_opts.args[0], path);
+                }
+                Some(GitCmd::Pull(_)) => {
+                    commands::git::pull();
+                }
+                Some(GitCmd::Push(push_opts)) => {
+                    commands::git::push(
+                        push_opts.remote.as_deref(),
+                        push_opts.branch.as_deref()
+                    );
+                }
+                Some(GitCmd::Stash(stash_opts)) => {
+                    let action = stash_opts.action.as_deref().unwrap_or("save");
+                    commands::git::stash(action);
                 }
                 None => {
                     eprintln!("Error: No git command specified");
@@ -1262,6 +1432,30 @@ fn main() {
             }
         }
         
+        Command::String(opts) => {
+            if opts.help {
+                println!("Usage: profilecore string <command>");
+                println!("Commands: base64, url-encode, hash");
+                return;
+            }
+            
+            match opts.command {
+                Some(StringCmd::Base64(base64_opts)) => {
+                    commands::string::base64_encode_decode(&base64_opts.input, base64_opts.decode);
+                }
+                Some(StringCmd::UrlEncode(url_opts)) => {
+                    commands::string::url_encode_decode(&url_opts.input, url_opts.decode);
+                }
+                Some(StringCmd::Hash(hash_opts)) => {
+                    commands::string::string_hash(&hash_opts.input, &hash_opts.algorithm);
+                }
+                None => {
+                    eprintln!("Error: No string command specified");
+                    process::exit(1);
+                }
+            }
+        }
+        
         Command::UninstallLegacy(_) => {
             commands::uninstall::uninstall_legacy();
         }
@@ -1288,6 +1482,7 @@ fn print_help() {
     println!("    text                Text processing");
     println!("    process             Process management");
     println!("    archive             Archive operations");
+    println!("    string              String utilities");
     println!("    uninstall-legacy    Remove v6.0.0 PowerShell modules");
     println!();
     println!("EXAMPLES:");

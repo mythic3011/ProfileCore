@@ -64,6 +64,8 @@ md5 = "0.7"                       # MD5 hashing
 flate2 = "1.0"                    # Gzip compression
 tar = "0.4"                       # TAR archive handling
 zip = "0.6"                       # ZIP archive handling
+base64 = "0.22"                   # Base64 encoding/decoding
+urlencoding = "2.1"               # URL encoding/decoding
 
 [target.'cfg(windows)'.dependencies]
 # Windows-specific (minimal)
