@@ -10,4 +10,5 @@ pub mod security;
 pub mod package;
 pub mod uninstall;
 pub mod file;
+pub mod env;
 

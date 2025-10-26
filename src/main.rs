@@ -53,6 +53,9 @@ enum Command {
     #[options(help = "file operations")]
     File(FileOpts),
     
+    #[options(help = "environment variable operations")]
+    Env(EnvOpts),
+    
     #[options(help = "uninstall legacy v6.0.0 PowerShell modules")]
     UninstallLegacy(UninstallOpts),
 }
@@ -275,6 +278,15 @@ enum GitCmd {
     #[options(help = "show git log")]
     Log(GitLogOpts),
     
+    #[options(help = "show working tree changes")]
+    Diff(DiffOpts),
+    
+    #[options(help = "list branches")]
+    Branch(BranchOpts),
+    
+    #[options(help = "list remote repositories")]
+    Remote(RemoteOpts),
+    
     #[options(help = "switch git account")]
     SwitchAccount(SwitchAccountOpts),
     
@@ -301,6 +313,27 @@ struct GitLogOpts {
     
     #[options(help = "number of commits to show", default = "10", meta = "N")]
     limit: usize,
+}
+
+#[derive(Options)]
+struct DiffOpts {
+    #[options(help = "show help")]
+    help: bool,
+}
+
+#[derive(Options)]
+struct BranchOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(help = "list all branches", short = "a")]
+    all: bool,
+}
+
+#[derive(Options)]
+struct RemoteOpts {
+    #[options(help = "show help")]
+    help: bool,
 }
 
 #[derive(Options)]
@@ -556,6 +589,15 @@ enum FileCmd {
     
     #[options(help = "get file/directory size")]
     Size(SizeOpts),
+    
+    #[options(help = "find files by pattern")]
+    Find(FindOpts),
+    
+    #[options(help = "show file permissions")]
+    Permissions(PermissionsOpts),
+    
+    #[options(help = "detect file type")]
+    Type(TypeOpts),
 }
 
 #[derive(Options)]
@@ -577,6 +619,81 @@ struct SizeOpts {
     
     #[options(free, help = "file or directory path")]
     path: String,
+}
+
+#[derive(Options)]
+struct FindOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "search pattern (supports wildcards)")]
+    pattern: String,
+    
+    #[options(help = "directory to search", default = ".", meta = "DIR")]
+    directory: String,
+}
+
+#[derive(Options)]
+struct PermissionsOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "file path")]
+    file: String,
+}
+
+#[derive(Options)]
+struct TypeOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "file path")]
+    file: String,
+}
+
+#[derive(Options)]
+struct EnvOpts {
+    #[options(help = "show help for env")]
+    help: bool,
+    
+    #[options(command)]
+    command: Option<EnvCmd>,
+}
+
+#[derive(Options)]
+enum EnvCmd {
+    #[options(help = "list all environment variables")]
+    List(ListEnvOpts),
+    
+    #[options(help = "get environment variable")]
+    Get(GetEnvOpts),
+    
+    #[options(help = "set environment variable")]
+    Set(SetEnvOpts),
+}
+
+#[derive(Options)]
+struct ListEnvOpts {
+    #[options(help = "show help")]
+    help: bool,
+}
+
+#[derive(Options)]
+struct GetEnvOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "variable name")]
+    variable: String,
+}
+
+#[derive(Options)]
+struct SetEnvOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "variable name and value")]
+    args: Vec<String>,
 }
 
 #[derive(Options)]
@@ -693,7 +810,7 @@ fn main() {
         Command::Git(opts) => {
             if opts.help {
                 println!("Usage: profilecore git <command>");
-                println!("Commands: status, log, switch-account, add-account, list-accounts, whoami");
+                println!("Commands: status, log, diff, branch, remote, switch-account, add-account, list-accounts, whoami");
                 return;
             }
             
@@ -703,6 +820,15 @@ fn main() {
                 }
                 Some(GitCmd::Log(log_opts)) => {
                     commands::git::log(log_opts.limit);
+                }
+                Some(GitCmd::Diff(_)) => {
+                    commands::git::diff();
+                }
+                Some(GitCmd::Branch(branch_opts)) => {
+                    commands::git::branch(branch_opts.all);
+                }
+                Some(GitCmd::Remote(_)) => {
+                    commands::git::remote();
                 }
                 Some(GitCmd::SwitchAccount(switch_opts)) => {
                     commands::git::switch_account(&switch_opts.account);
@@ -813,7 +939,7 @@ fn main() {
         Command::File(opts) => {
             if opts.help {
                 println!("Usage: profilecore file <command>");
-                println!("Commands: hash, size");
+                println!("Commands: hash, size, find, permissions, type");
                 return;
             }
             
@@ -824,8 +950,46 @@ fn main() {
                 Some(FileCmd::Size(size_opts)) => {
                     commands::file::size(&size_opts.path);
                 }
+                Some(FileCmd::Find(find_opts)) => {
+                    commands::file::find(&find_opts.pattern, &find_opts.directory);
+                }
+                Some(FileCmd::Permissions(perm_opts)) => {
+                    commands::file::permissions(&perm_opts.file);
+                }
+                Some(FileCmd::Type(type_opts)) => {
+                    commands::file::file_type(&type_opts.file);
+                }
                 None => {
                     eprintln!("Error: No file command specified");
+                    process::exit(1);
+                }
+            }
+        }
+        
+        Command::Env(opts) => {
+            if opts.help {
+                println!("Usage: profilecore env <command>");
+                println!("Commands: list, get, set");
+                return;
+            }
+            
+            match opts.command {
+                Some(EnvCmd::List(_)) => {
+                    commands::env::list();
+                }
+                Some(EnvCmd::Get(get_opts)) => {
+                    commands::env::get(&get_opts.variable);
+                }
+                Some(EnvCmd::Set(set_opts)) => {
+                    if set_opts.args.len() < 2 {
+                        eprintln!("Error: env set requires variable name and value");
+                        eprintln!("Usage: profilecore env set <variable> <value>");
+                        process::exit(1);
+                    }
+                    commands::env::set(&set_opts.args[0], &set_opts.args[1]);
+                }
+                None => {
+                    eprintln!("Error: No env command specified");
                     process::exit(1);
                 }
             }

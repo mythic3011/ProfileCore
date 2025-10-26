@@ -339,3 +339,215 @@ pub fn log(limit: usize) {
     println!();
 }
 
+pub fn diff() {
+    let current_dir = match env::current_dir() {
+        Ok(dir) => dir,
+        Err(e) => {
+            eprintln!("{} Failed to get current directory: {}", "✗".red(), e);
+            return;
+        }
+    };
+    
+    let repo = match Repository::discover(&current_dir) {
+        Ok(r) => r,
+        Err(e) => {
+            eprintln!("{} Not a git repository: {}", "✗".red(), e);
+            return;
+        }
+    };
+    
+    println!("\n{}", "Git Diff (Working Tree Changes)".cyan().bold());
+    println!("{}", "=".repeat(80));
+    
+    // Get the diff between HEAD and working directory
+    let head_tree = match repo.head() {
+        Ok(head) => match head.peel_to_tree() {
+            Ok(tree) => Some(tree),
+            Err(_) => None,
+        },
+        Err(_) => None,
+    };
+    
+    let diff = match head_tree {
+        Some(tree) => repo.diff_tree_to_workdir_with_index(Some(&tree), None),
+        None => repo.diff_tree_to_workdir_with_index(None, None),
+    };
+    
+    let diff = match diff {
+        Ok(d) => d,
+        Err(e) => {
+            eprintln!("{} Failed to get diff: {}", "✗".red(), e);
+            return;
+        }
+    };
+    
+    let stats = match diff.stats() {
+        Ok(s) => s,
+        Err(e) => {
+            eprintln!("{} Failed to get stats: {}", "✗".red(), e);
+            return;
+        }
+    };
+    
+    if stats.files_changed() == 0 {
+        println!("{} No changes", "✓".green());
+    } else {
+        println!("\n{} {} file(s) changed, {} insertion(s)(+), {} deletion(s)(-)",
+            "📊".to_string(),
+            stats.files_changed(),
+            stats.insertions(),
+            stats.deletions()
+        );
+        
+        // Print file-by-file stats
+        diff.print(git2::DiffFormat::NameStatus, |_delta, _hunk, line| {
+            let origin = line.origin();
+            let content = String::from_utf8_lossy(line.content());
+            
+            match origin {
+                '+' => print!("{}", format!("+ {}", content).green()),
+                '-' => print!("{}", format!("- {}", content).red()),
+                _ => print!("{}", content),
+            }
+            true
+        }).ok();
+    }
+    
+    println!();
+}
+
+pub fn branch(list_all: bool) {
+    let current_dir = match env::current_dir() {
+        Ok(dir) => dir,
+        Err(e) => {
+            eprintln!("{} Failed to get current directory: {}", "✗".red(), e);
+            return;
+        }
+    };
+    
+    let repo = match Repository::discover(&current_dir) {
+        Ok(r) => r,
+        Err(e) => {
+            eprintln!("{} Not a git repository: {}", "✗".red(), e);
+            return;
+        }
+    };
+    
+    println!("\n{}", "Git Branches".cyan().bold());
+    println!("{}", "=".repeat(60));
+    
+    let branches = if list_all {
+        repo.branches(Some(git2::BranchType::Local)).ok()
+    } else {
+        repo.branches(Some(git2::BranchType::Local)).ok()
+    };
+    
+    let branches = match branches {
+        Some(b) => b,
+        None => {
+            eprintln!("{} Failed to list branches", "✗".red());
+            return;
+        }
+    };
+    
+    // Get current branch
+    let head = repo.head().ok();
+    let current_branch = head.and_then(|h| h.shorthand().map(|s| s.to_string()));
+    
+    let mut count = 0;
+    for branch_result in branches {
+        let (branch, _branch_type) = match branch_result {
+            Ok(b) => b,
+            Err(e) => {
+                eprintln!("{} Error reading branch: {}", "!".yellow(), e);
+                continue;
+            }
+        };
+        
+        let name = match branch.name() {
+            Ok(Some(n)) => n,
+            Ok(None) => "(unnamed)",
+            Err(_) => "(error)",
+        };
+        
+        let is_current = current_branch.as_deref() == Some(name);
+        
+        if is_current {
+            println!("  {} {}", "*".green().bold(), name.green().bold());
+        } else {
+            println!("    {}", name);
+        }
+        
+        count += 1;
+    }
+    
+    if count == 0 {
+        println!("{} No branches found", "!".yellow());
+    }
+    
+    println!();
+}
+
+pub fn remote() {
+    let current_dir = match env::current_dir() {
+        Ok(dir) => dir,
+        Err(e) => {
+            eprintln!("{} Failed to get current directory: {}", "✗".red(), e);
+            return;
+        }
+    };
+    
+    let repo = match Repository::discover(&current_dir) {
+        Ok(r) => r,
+        Err(e) => {
+            eprintln!("{} Not a git repository: {}", "✗".red(), e);
+            return;
+        }
+    };
+    
+    println!("\n{}", "Git Remotes".cyan().bold());
+    println!("{}", "=".repeat(60));
+    
+    let remotes = match repo.remotes() {
+        Ok(r) => r,
+        Err(e) => {
+            eprintln!("{} Failed to get remotes: {}", "✗".red(), e);
+            return;
+        }
+    };
+    
+    if remotes.is_empty() {
+        println!("{} No remotes configured", "!".yellow());
+        println!();
+        return;
+    }
+    
+    let mut table = Table::new();
+    table.load_preset(UTF8_FULL);
+    table.set_header(vec![
+        Cell::new("Name").fg(Color::Cyan),
+        Cell::new("URL").fg(Color::Cyan),
+    ]);
+    
+    for remote_name in remotes.iter() {
+        let remote_name = match remote_name {
+            Some(n) => n,
+            None => continue,
+        };
+        
+        let remote = match repo.find_remote(remote_name) {
+            Ok(r) => r,
+            Err(_) => continue,
+        };
+        
+        let url = remote.url().unwrap_or("(no URL)");
+        
+        table.add_row(vec![
+            Cell::new(remote_name),
+            Cell::new(url),
+        ]);
+    }
+    
+    println!("{}\n", table);
+}
+
