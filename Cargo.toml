@@ -66,6 +66,7 @@ tar = "0.4"                       # TAR archive handling
 zip = "0.6"                       # ZIP archive handling
 base64 = "0.22"                   # Base64 encoding/decoding
 urlencoding = "2.1"               # URL encoding/decoding
+meval = "0.2"                     # Mathematical expression evaluation
 
 [target.'cfg(windows)'.dependencies]
 # Windows-specific (minimal)

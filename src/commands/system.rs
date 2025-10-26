@@ -377,3 +377,148 @@ pub fn temperature() {
     println!("{}\n", table);
 }
 
+pub fn users() {
+    println!("\n{}", "System Users".cyan().bold());
+    println!("{}", "=".repeat(60));
+    
+    // Get current user
+    let current_user = whoami::username();
+    println!("Current User: {}", current_user.green());
+    
+    #[cfg(unix)]
+    {
+        use std::process::Command;
+        match Command::new("getent")
+            .args(&["passwd"])
+            .output()
+        {
+            Ok(output) => {
+                if output.status.success() {
+                    let passwd = String::from_utf8_lossy(&output.stdout);
+                    println!("\nSystem Users:");
+                    for line in passwd.lines().take(20) {
+                        let parts: Vec<&str> = line.split(':').collect();
+                        if parts.len() >= 3 {
+                            println!("  {} (UID: {})", parts[0].cyan(), parts[2]);
+                        }
+                    }
+                }
+            }
+            Err(_) => {
+                println!("\n{} Could not list users (getent not available)", "!".yellow());
+            }
+        }
+    }
+    
+    #[cfg(windows)]
+    {
+        println!("\n{} Detailed user listing requires elevation on Windows", "ℹ".cyan());
+        println!("Run: {} to see all users", "net user".yellow());
+    }
+    
+    println!();
+}
+
+pub fn service_list() {
+    println!("\n{}", "System Services".cyan().bold());
+    println!("{}", "=".repeat(80));
+    
+    #[cfg(windows)]
+    {
+        use std::process::Command;
+        match Command::new("sc")
+            .args(&["query", "type=", "service", "state=", "all"])
+            .output()
+        {
+            Ok(output) => {
+                let services = String::from_utf8_lossy(&output.stdout);
+                println!("{}", services);
+            }
+            Err(e) => {
+                eprintln!("{} Failed to query services: {}", "✗".red(), e);
+            }
+        }
+    }
+    
+    #[cfg(unix)]
+    {
+        use std::process::Command;
+        // Try systemctl first
+        match Command::new("systemctl")
+            .args(&["list-units", "--type=service", "--all", "--no-pager"])
+            .output()
+        {
+            Ok(output) => {
+                if output.status.success() {
+                    let services = String::from_utf8_lossy(&output.stdout);
+                    println!("{}", services);
+                } else {
+                    println!("{} systemctl not available, trying service command", "!".yellow());
+                    match Command::new("service")
+                        .args(&["--status-all"])
+                        .output()
+                    {
+                        Ok(svc_output) => {
+                            let services = String::from_utf8_lossy(&svc_output.stdout);
+                            println!("{}", services);
+                        }
+                        Err(e) => {
+                            eprintln!("{} Failed to list services: {}", "✗".red(), e);
+                        }
+                    }
+                }
+            }
+            Err(e) => {
+                eprintln!("{} Failed to run systemctl: {}", "✗".red(), e);
+            }
+        }
+    }
+    
+    println!();
+}
+
+pub fn service_status(name: &str) {
+    println!("\n{} {}", "Service Status:".cyan().bold(), name.yellow());
+    println!("{}", "=".repeat(60));
+    
+    #[cfg(windows)]
+    {
+        use std::process::Command;
+        match Command::new("sc")
+            .args(&["query", name])
+            .output()
+        {
+            Ok(output) => {
+                if output.status.success() {
+                    let status = String::from_utf8_lossy(&output.stdout);
+                    println!("{}", status);
+                } else {
+                    eprintln!("{} Service '{}' not found", "✗".red(), name);
+                }
+            }
+            Err(e) => {
+                eprintln!("{} Failed to query service: {}", "✗".red(), e);
+            }
+        }
+    }
+    
+    #[cfg(unix)]
+    {
+        use std::process::Command;
+        match Command::new("systemctl")
+            .args(&["status", name, "--no-pager"])
+            .output()
+        {
+            Ok(output) => {
+                let status = String::from_utf8_lossy(&output.stdout);
+                println!("{}", status);
+            }
+            Err(e) => {
+                eprintln!("{} Failed to get service status: {}", "✗".red(), e);
+            }
+        }
+    }
+    
+    println!();
+}
+

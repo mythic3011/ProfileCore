@@ -74,6 +74,12 @@ enum Command {
     #[options(help = "data processing commands")]
     Data(DataOpts),
     
+    #[options(help = "shell utility commands")]
+    Shell(ShellOpts),
+    
+    #[options(help = "utility commands (calc, random, time, config)")]
+    Utils(UtilsOpts),
+    
     #[options(help = "uninstall legacy v6.0.0 PowerShell modules")]
     UninstallLegacy(UninstallOpts),
 }
@@ -133,6 +139,15 @@ enum SystemCmd {
     
     #[options(help = "show temperature sensors")]
     Temperature(TemperatureOpts),
+    
+    #[options(help = "list system users")]
+    Users(UsersOpts),
+    
+    #[options(help = "list system services")]
+    ServiceList(ServiceListOpts),
+    
+    #[options(help = "show service status")]
+    ServiceStatus(ServiceStatusOpts),
 }
 
 #[derive(Options)]
@@ -193,6 +208,27 @@ struct NetworkStatsOpts {
 struct TemperatureOpts {
     #[options(help = "show help")]
     help: bool,
+}
+
+#[derive(Options)]
+struct UsersOpts {
+    #[options(help = "show help")]
+    help: bool,
+}
+
+#[derive(Options)]
+struct ServiceListOpts {
+    #[options(help = "show help")]
+    help: bool,
+}
+
+#[derive(Options)]
+struct ServiceStatusOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "service name")]
+    name: String,
 }
 
 #[derive(Options)]
@@ -1177,6 +1213,204 @@ struct DataJsonToYamlOpts {
 }
 
 #[derive(Options)]
+struct ShellOpts {
+    #[options(help = "show help for shell")]
+    help: bool,
+    
+    #[options(command)]
+    command: Option<ShellCmd>,
+}
+
+#[derive(Options)]
+enum ShellCmd {
+    #[options(help = "show shell history")]
+    History(HistoryOpts),
+    
+    #[options(help = "find command in PATH")]
+    Which(WhichOpts),
+    
+    #[options(help = "execute a command")]
+    Exec(ExecOpts),
+    
+    #[options(help = "show PATH variable")]
+    Path(PathOpts),
+    
+    #[options(help = "list aliases")]
+    Alias(AliasOpts),
+}
+
+#[derive(Options)]
+struct HistoryOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(help = "number of entries to show", default = "50", meta = "N")]
+    limit: usize,
+}
+
+#[derive(Options)]
+struct WhichOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "command to find")]
+    command: String,
+}
+
+#[derive(Options)]
+struct ExecOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "command and arguments")]
+    args: Vec<String>,
+}
+
+#[derive(Options)]
+struct PathOpts {
+    #[options(help = "show help")]
+    help: bool,
+}
+
+#[derive(Options)]
+struct AliasOpts {
+    #[options(help = "show help")]
+    help: bool,
+}
+
+#[derive(Options)]
+struct UtilsOpts {
+    #[options(help = "show help for utils")]
+    help: bool,
+    
+    #[options(command)]
+    command: Option<UtilsCmd>,
+}
+
+#[derive(Options)]
+enum UtilsCmd {
+    #[options(help = "calculator")]
+    Calc(CalcOpts),
+    
+    #[options(help = "random number generator")]
+    Random(RandomOpts),
+    
+    #[options(help = "random string generator")]
+    RandomString(RandomStringOpts),
+    
+    #[options(help = "sleep/delay")]
+    Sleep(SleepOpts),
+    
+    #[options(help = "show current time")]
+    Time(TimeOpts),
+    
+    #[options(help = "show time zones")]
+    Timezone(TimezoneOpts),
+    
+    #[options(help = "show version information")]
+    Version(VersionOpts),
+    
+    #[options(help = "get configuration value")]
+    ConfigGet(ConfigGetOpts),
+    
+    #[options(help = "set configuration value")]
+    ConfigSet(ConfigSetOpts),
+    
+    #[options(help = "list configuration")]
+    ConfigList(ConfigListOpts),
+}
+
+#[derive(Options)]
+struct CalcOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "mathematical expression")]
+    expression: String,
+}
+
+#[derive(Options)]
+struct RandomOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(help = "minimum value", default = "1", meta = "MIN")]
+    min: i64,
+    
+    #[options(help = "maximum value", default = "100", meta = "MAX")]
+    max: i64,
+    
+    #[options(help = "number of values to generate", default = "1", meta = "N")]
+    count: usize,
+}
+
+#[derive(Options)]
+struct RandomStringOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(help = "length of string", default = "16", meta = "N")]
+    length: usize,
+    
+    #[options(help = "charset: alpha, numeric, alphanumeric, hex, all", default = "alphanumeric", meta = "SET")]
+    charset: String,
+}
+
+#[derive(Options)]
+struct SleepOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "seconds to sleep")]
+    seconds: u64,
+}
+
+#[derive(Options)]
+struct TimeOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(help = "show UTC time", short = "u")]
+    utc: bool,
+}
+
+#[derive(Options)]
+struct TimezoneOpts {
+    #[options(help = "show help")]
+    help: bool,
+}
+
+#[derive(Options)]
+struct VersionOpts {
+    #[options(help = "show help")]
+    help: bool,
+}
+
+#[derive(Options)]
+struct ConfigGetOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "configuration key")]
+    key: String,
+}
+
+#[derive(Options)]
+struct ConfigSetOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "key and value")]
+    args: Vec<String>,
+}
+
+#[derive(Options)]
+struct ConfigListOpts {
+    #[options(help = "show help")]
+    help: bool,
+}
+
+#[derive(Options)]
 struct UninstallOpts {
     #[options(help = "show help")]
     help: bool,
@@ -1217,7 +1451,7 @@ fn main() {
         Command::System(opts) => {
             if opts.help {
                 println!("Usage: profilecore system <command>");
-                println!("Commands: info, uptime, processes, disk-usage, memory, cpu, load, network-stats, temperature");
+                println!("Commands: info, uptime, processes, disk-usage, memory, cpu, load, network-stats, temperature, users, service-list, service-status");
                 return;
             }
             
@@ -1248,6 +1482,15 @@ fn main() {
                 }
                 Some(SystemCmd::Temperature(_)) => {
                     commands::system::temperature();
+                }
+                Some(SystemCmd::Users(_)) => {
+                    commands::system::users();
+                }
+                Some(SystemCmd::ServiceList(_)) => {
+                    commands::system::service_list();
+                }
+                Some(SystemCmd::ServiceStatus(status_opts)) => {
+                    commands::system::service_status(&status_opts.name);
                 }
                 None => {
                     eprintln!("Error: No system command specified");
@@ -1701,6 +1944,93 @@ fn main() {
             }
         }
         
+        Command::Shell(opts) => {
+            if opts.help {
+                println!("Usage: profilecore shell <command>");
+                println!("Commands: history, which, exec, path, alias");
+                return;
+            }
+            
+            match opts.command {
+                Some(ShellCmd::History(hist_opts)) => {
+                    commands::shell::history(Some(hist_opts.limit));
+                }
+                Some(ShellCmd::Which(which_opts)) => {
+                    commands::shell::which_cmd(&which_opts.command);
+                }
+                Some(ShellCmd::Exec(exec_opts)) => {
+                    if exec_opts.args.is_empty() {
+                        eprintln!("Error: exec requires a command");
+                        eprintln!("Usage: profilecore shell exec <command> [args...]");
+                        process::exit(1);
+                    }
+                    let cmd = &exec_opts.args[0];
+                    let args = exec_opts.args[1..].to_vec();
+                    commands::shell::exec_cmd(cmd, args);
+                }
+                Some(ShellCmd::Path(_)) => {
+                    commands::shell::env_path();
+                }
+                Some(ShellCmd::Alias(_)) => {
+                    commands::shell::alias_list();
+                }
+                None => {
+                    eprintln!("Error: No shell command specified");
+                    process::exit(1);
+                }
+            }
+        }
+        
+        Command::Utils(opts) => {
+            if opts.help {
+                println!("Usage: profilecore utils <command>");
+                println!("Commands: calc, random, random-string, sleep, time, timezone, version, config-get, config-set, config-list");
+                return;
+            }
+            
+            match opts.command {
+                Some(UtilsCmd::Calc(calc_opts)) => {
+                    commands::utils::calculate(&calc_opts.expression);
+                }
+                Some(UtilsCmd::Random(rand_opts)) => {
+                    commands::utils::random_gen(rand_opts.min, rand_opts.max, rand_opts.count);
+                }
+                Some(UtilsCmd::RandomString(str_opts)) => {
+                    commands::utils::random_string(str_opts.length, &str_opts.charset);
+                }
+                Some(UtilsCmd::Sleep(sleep_opts)) => {
+                    commands::utils::sleep_cmd(sleep_opts.seconds);
+                }
+                Some(UtilsCmd::Time(time_opts)) => {
+                    commands::utils::time_now(time_opts.utc);
+                }
+                Some(UtilsCmd::Timezone(_)) => {
+                    commands::utils::time_zones();
+                }
+                Some(UtilsCmd::Version(_)) => {
+                    commands::utils::version_info();
+                }
+                Some(UtilsCmd::ConfigGet(get_opts)) => {
+                    commands::utils::config_get(&get_opts.key);
+                }
+                Some(UtilsCmd::ConfigSet(set_opts)) => {
+                    if set_opts.args.len() < 2 {
+                        eprintln!("Error: config-set requires key and value");
+                        eprintln!("Usage: profilecore utils config-set <key> <value>");
+                        process::exit(1);
+                    }
+                    commands::utils::config_set(&set_opts.args[0], &set_opts.args[1]);
+                }
+                Some(UtilsCmd::ConfigList(_)) => {
+                    commands::utils::config_list();
+                }
+                None => {
+                    eprintln!("Error: No utils command specified");
+                    process::exit(1);
+                }
+            }
+        }
+        
         Command::UninstallLegacy(_) => {
             commands::uninstall::uninstall_legacy();
         }
@@ -1730,6 +2060,8 @@ fn print_help() {
     println!("    string              String utilities");
     println!("    http                HTTP utilities");
     println!("    data                Data processing");
+    println!("    shell               Shell utilities");
+    println!("    utils               Utilities (calc, random, time, config)");
     println!("    uninstall-legacy    Remove v6.0.0 PowerShell modules");
     println!();
     println!("EXAMPLES:");

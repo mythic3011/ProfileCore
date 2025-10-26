@@ -17,4 +17,6 @@ pub mod archive;
 pub mod string;
 pub mod http;
 pub mod data;
+pub mod shell;
+pub mod utils;
 
