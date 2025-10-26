@@ -11,4 +11,7 @@ pub mod package;
 pub mod uninstall;
 pub mod file;
 pub mod env;
+pub mod text;
+pub mod process;
+pub mod archive;
 

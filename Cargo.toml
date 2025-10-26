@@ -61,6 +61,9 @@ regex = "1.11"                    # Regular expressions
 rand = "0.8"                      # Random generation
 sha2 = "0.10"                     # SHA-256 hashing
 md5 = "0.7"                       # MD5 hashing
+flate2 = "1.0"                    # Gzip compression
+tar = "0.4"                       # TAR archive handling
+zip = "0.6"                       # ZIP archive handling
 
 [target.'cfg(windows)'.dependencies]
 # Windows-specific (minimal)

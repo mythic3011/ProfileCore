@@ -25,9 +25,9 @@ _profilecore_completions() {{
     prev="${{COMP_WORDS[COMP_CWORD-1]}}"
     
     # Top-level commands
-    commands="init completions system network git docker security package file env uninstall-legacy"
+    commands="init completions system network git docker security package file env text process archive uninstall-legacy"
     
-    # Subcommands (updated with all 48 commands)
+    # Subcommands (updated with all 58 commands)
     system_cmds="info uptime processes disk-usage memory cpu"
     network_cmds="public-ip test-port local-ips dns reverse-dns whois trace ping"
     git_cmds="status log diff branch remote switch-account add-account list-accounts whoami"
@@ -36,6 +36,9 @@ _profilecore_completions() {{
     package_cmds="install list search update upgrade remove info"
     file_cmds="hash size find permissions type"
     env_cmds="list get set"
+    text_cmds="grep head tail"
+    process_cmds="list kill info tree"
+    archive_cmds="compress extract list"
     
     case "${{COMP_CWORD}}" in
         1)
@@ -70,6 +73,15 @@ _profilecore_completions() {{
                 env)
                     COMPREPLY=($(compgen -W "${{env_cmds}}" -- "${{cur}}"))
                     ;;
+                text)
+                    COMPREPLY=($(compgen -W "${{text_cmds}}" -- "${{cur}}"))
+                    ;;
+                process)
+                    COMPREPLY=($(compgen -W "${{process_cmds}}" -- "${{cur}}"))
+                    ;;
+                archive)
+                    COMPREPLY=($(compgen -W "${{archive_cmds}}" -- "${{cur}}"))
+                    ;;
             esac
             ;;
     esac
@@ -96,6 +108,9 @@ _profilecore() {{
         'package:Package management'
         'file:File operations'
         'env:Environment variables'
+        'text:Text processing'
+        'process:Process management'
+        'archive:Archive operations'
         'uninstall-legacy:Uninstall v6.0.0 modules'
     )
     
@@ -176,6 +191,28 @@ _profilecore() {{
         'set:Set environment variable'
     )
     
+    local -a text_cmds
+    text_cmds=(
+        'grep:Search text in file'
+        'head:Show first N lines'
+        'tail:Show last N lines'
+    )
+    
+    local -a process_cmds
+    process_cmds=(
+        'list:List running processes'
+        'kill:Terminate a process'
+        'info:Show process information'
+        'tree:Show process tree'
+    )
+    
+    local -a archive_cmds
+    archive_cmds=(
+        'compress:Compress files/directories'
+        'extract:Extract archive'
+        'list:List archive contents'
+    )
+    
     if (( CURRENT == 2 )); then
         _describe 'command' commands
     elif (( CURRENT == 3 )); then
@@ -207,6 +244,15 @@ _profilecore() {{
             env)
                 _describe 'env command' env_cmds
                 ;;
+            text)
+                _describe 'text command' text_cmds
+                ;;
+            process)
+                _describe 'process command' process_cmds
+                ;;
+            archive)
+                _describe 'archive command' archive_cmds
+                ;;
         esac
     fi
 }}
@@ -230,6 +276,9 @@ complete -c profilecore -f -n "__fish_use_subcommand" -a "security" -d "Security
 complete -c profilecore -f -n "__fish_use_subcommand" -a "package" -d "Package management"
 complete -c profilecore -f -n "__fish_use_subcommand" -a "file" -d "File operations"
 complete -c profilecore -f -n "__fish_use_subcommand" -a "env" -d "Environment variables"
+complete -c profilecore -f -n "__fish_use_subcommand" -a "text" -d "Text processing"
+complete -c profilecore -f -n "__fish_use_subcommand" -a "process" -d "Process management"
+complete -c profilecore -f -n "__fish_use_subcommand" -a "archive" -d "Archive operations"
 complete -c profilecore -f -n "__fish_use_subcommand" -a "uninstall-legacy" -d "Uninstall v6.0.0 modules"
 
 # Init/Completions shells
@@ -295,6 +344,22 @@ complete -c profilecore -f -n "__fish_seen_subcommand_from file" -a "type" -d "D
 complete -c profilecore -f -n "__fish_seen_subcommand_from env" -a "list" -d "List all environment variables"
 complete -c profilecore -f -n "__fish_seen_subcommand_from env" -a "get" -d "Get environment variable"
 complete -c profilecore -f -n "__fish_seen_subcommand_from env" -a "set" -d "Set environment variable"
+
+# Text processing subcommands (all 3 commands)
+complete -c profilecore -f -n "__fish_seen_subcommand_from text" -a "grep" -d "Search text in file"
+complete -c profilecore -f -n "__fish_seen_subcommand_from text" -a "head" -d "Show first N lines"
+complete -c profilecore -f -n "__fish_seen_subcommand_from text" -a "tail" -d "Show last N lines"
+
+# Process management subcommands (all 4 commands)
+complete -c profilecore -f -n "__fish_seen_subcommand_from process" -a "list" -d "List running processes"
+complete -c profilecore -f -n "__fish_seen_subcommand_from process" -a "kill" -d "Terminate a process"
+complete -c profilecore -f -n "__fish_seen_subcommand_from process" -a "info" -d "Show process information"
+complete -c profilecore -f -n "__fish_seen_subcommand_from process" -a "tree" -d "Show process tree"
+
+# Archive operation subcommands (all 3 commands)
+complete -c profilecore -f -n "__fish_seen_subcommand_from archive" -a "compress" -d "Compress files/directories"
+complete -c profilecore -f -n "__fish_seen_subcommand_from archive" -a "extract" -d "Extract archive"
+complete -c profilecore -f -n "__fish_seen_subcommand_from archive" -a "list" -d "List archive contents"
 "#);
 }
 
@@ -316,10 +381,13 @@ Register-ArgumentCompleter -CommandName profilecore -ScriptBlock {{
         @{{ Name = 'package'; Description = 'Package management' }}
         @{{ Name = 'file'; Description = 'File operations' }}
         @{{ Name = 'env'; Description = 'Environment variables' }}
+        @{{ Name = 'text'; Description = 'Text processing' }}
+        @{{ Name = 'process'; Description = 'Process management' }}
+        @{{ Name = 'archive'; Description = 'Archive operations' }}
         @{{ Name = 'uninstall-legacy'; Description = 'Uninstall legacy modules' }}
     )
     
-    # All 48 commands
+    # All 58 commands
     $systemCmds = @('info', 'uptime', 'processes', 'disk-usage', 'memory', 'cpu')
     $networkCmds = @('public-ip', 'test-port', 'local-ips', 'dns', 'reverse-dns', 'whois', 'trace', 'ping')
     $gitCmds = @('status', 'log', 'diff', 'branch', 'remote', 'switch-account', 'add-account', 'list-accounts', 'whoami')
@@ -328,6 +396,9 @@ Register-ArgumentCompleter -CommandName profilecore -ScriptBlock {{
     $packageCmds = @('install', 'list', 'search', 'update', 'upgrade', 'remove', 'info')
     $fileCmds = @('hash', 'size', 'find', 'permissions', 'type')
     $envCmds = @('list', 'get', 'set')
+    $textCmds = @('grep', 'head', 'tail')
+    $processCmds = @('list', 'kill', 'info', 'tree')
+    $archiveCmds = @('compress', 'extract', 'list')
     
     $tokens = $commandAst.ToString().Split(' ')
     
@@ -346,6 +417,9 @@ Register-ArgumentCompleter -CommandName profilecore -ScriptBlock {{
             'package' {{ $packageCmds }}
             'file' {{ $fileCmds }}
             'env' {{ $envCmds }}
+            'text' {{ $textCmds }}
+            'process' {{ $processCmds }}
+            'archive' {{ $archiveCmds }}
             default {{ @() }}
         }}
         

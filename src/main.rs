@@ -56,6 +56,15 @@ enum Command {
     #[options(help = "environment variable operations")]
     Env(EnvOpts),
     
+    #[options(help = "text processing commands")]
+    Text(TextOpts),
+    
+    #[options(help = "process management commands")]
+    Process(ProcessOpts),
+    
+    #[options(help = "archive operations")]
+    Archive(ArchiveOpts),
+    
     #[options(help = "uninstall legacy v6.0.0 PowerShell modules")]
     UninstallLegacy(UninstallOpts),
 }
@@ -697,6 +706,174 @@ struct SetEnvOpts {
 }
 
 #[derive(Options)]
+struct TextOpts {
+    #[options(help = "show help for text")]
+    help: bool,
+    
+    #[options(command)]
+    command: Option<TextCmd>,
+}
+
+#[derive(Options)]
+enum TextCmd {
+    #[options(help = "search text in file (grep)")]
+    Grep(GrepOpts),
+    
+    #[options(help = "show first N lines")]
+    Head(HeadOpts),
+    
+    #[options(help = "show last N lines")]
+    Tail(TailOpts),
+}
+
+#[derive(Options)]
+struct GrepOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "pattern and file path")]
+    args: Vec<String>,
+    
+    #[options(help = "ignore case", short = "i")]
+    ignore_case: bool,
+}
+
+#[derive(Options)]
+struct HeadOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "file path")]
+    file: String,
+    
+    #[options(help = "number of lines", short = "n", default = "10", meta = "N")]
+    lines: usize,
+}
+
+#[derive(Options)]
+struct TailOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "file path")]
+    file: String,
+    
+    #[options(help = "number of lines", short = "n", default = "10", meta = "N")]
+    lines: usize,
+}
+
+#[derive(Options)]
+struct ProcessOpts {
+    #[options(help = "show help for process")]
+    help: bool,
+    
+    #[options(command)]
+    command: Option<ProcessCmd>,
+}
+
+#[derive(Options)]
+enum ProcessCmd {
+    #[options(help = "list running processes")]
+    List(ProcessListOpts),
+    
+    #[options(help = "terminate a process")]
+    Kill(KillOpts),
+    
+    #[options(help = "show process information")]
+    Info(ProcessInfoOpts),
+    
+    #[options(help = "show process tree")]
+    Tree(ProcessTreeOpts),
+}
+
+#[derive(Options)]
+struct ProcessListOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(help = "number of processes to show", short = "n", default = "20", meta = "N")]
+    limit: usize,
+}
+
+#[derive(Options)]
+struct KillOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "process ID")]
+    pid: u32,
+    
+    #[options(help = "force kill", short = "f")]
+    force: bool,
+}
+
+#[derive(Options)]
+struct ProcessInfoOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "process ID")]
+    pid: u32,
+}
+
+#[derive(Options)]
+struct ProcessTreeOpts {
+    #[options(help = "show help")]
+    help: bool,
+}
+
+#[derive(Options)]
+struct ArchiveOpts {
+    #[options(help = "show help for archive")]
+    help: bool,
+    
+    #[options(command)]
+    command: Option<ArchiveCmd>,
+}
+
+#[derive(Options)]
+enum ArchiveCmd {
+    #[options(help = "compress files/directories")]
+    Compress(CompressOpts),
+    
+    #[options(help = "extract archive")]
+    Extract(ExtractOpts),
+    
+    #[options(help = "list archive contents")]
+    List(ArchiveListOpts),
+}
+
+#[derive(Options)]
+struct CompressOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "source and output paths")]
+    args: Vec<String>,
+    
+    #[options(help = "format: gzip, tar, tar.gz, zip", short = "f", default = "tar.gz", meta = "FMT")]
+    format: String,
+}
+
+#[derive(Options)]
+struct ExtractOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "archive and destination paths")]
+    args: Vec<String>,
+}
+
+#[derive(Options)]
+struct ArchiveListOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "archive path")]
+    archive: String,
+}
+
+#[derive(Options)]
 struct UninstallOpts {
     #[options(help = "show help")]
     help: bool,
@@ -995,6 +1172,96 @@ fn main() {
             }
         }
         
+        Command::Text(opts) => {
+            if opts.help {
+                println!("Usage: profilecore text <command>");
+                println!("Commands: grep, head, tail");
+                return;
+            }
+            
+            match opts.command {
+                Some(TextCmd::Grep(grep_opts)) => {
+                    if grep_opts.args.len() < 2 {
+                        eprintln!("Error: grep requires pattern and file path");
+                        eprintln!("Usage: profilecore text grep <pattern> <file>");
+                        process::exit(1);
+                    }
+                    commands::text::grep(&grep_opts.args[0], &grep_opts.args[1], grep_opts.ignore_case);
+                }
+                Some(TextCmd::Head(head_opts)) => {
+                    commands::text::head(&head_opts.file, head_opts.lines);
+                }
+                Some(TextCmd::Tail(tail_opts)) => {
+                    commands::text::tail(&tail_opts.file, tail_opts.lines);
+                }
+                None => {
+                    eprintln!("Error: No text command specified");
+                    process::exit(1);
+                }
+            }
+        }
+        
+        Command::Process(opts) => {
+            if opts.help {
+                println!("Usage: profilecore process <command>");
+                println!("Commands: list, kill, info, tree");
+                return;
+            }
+            
+            match opts.command {
+                Some(ProcessCmd::List(list_opts)) => {
+                    commands::process::list(list_opts.limit);
+                }
+                Some(ProcessCmd::Kill(kill_opts)) => {
+                    commands::process::kill(kill_opts.pid, kill_opts.force);
+                }
+                Some(ProcessCmd::Info(info_opts)) => {
+                    commands::process::info(info_opts.pid);
+                }
+                Some(ProcessCmd::Tree(_)) => {
+                    commands::process::tree();
+                }
+                None => {
+                    eprintln!("Error: No process command specified");
+                    process::exit(1);
+                }
+            }
+        }
+        
+        Command::Archive(opts) => {
+            if opts.help {
+                println!("Usage: profilecore archive <command>");
+                println!("Commands: compress, extract, list");
+                return;
+            }
+            
+            match opts.command {
+                Some(ArchiveCmd::Compress(compress_opts)) => {
+                    if compress_opts.args.len() < 2 {
+                        eprintln!("Error: compress requires source and output paths");
+                        eprintln!("Usage: profilecore archive compress <source> <output>");
+                        process::exit(1);
+                    }
+                    commands::archive::compress(&compress_opts.args[0], &compress_opts.args[1], &compress_opts.format);
+                }
+                Some(ArchiveCmd::Extract(extract_opts)) => {
+                    if extract_opts.args.len() < 2 {
+                        eprintln!("Error: extract requires archive and destination paths");
+                        eprintln!("Usage: profilecore archive extract <archive> <destination>");
+                        process::exit(1);
+                    }
+                    commands::archive::extract(&extract_opts.args[0], &extract_opts.args[1]);
+                }
+                Some(ArchiveCmd::List(list_opts)) => {
+                    commands::archive::list(&list_opts.archive);
+                }
+                None => {
+                    eprintln!("Error: No archive command specified");
+                    process::exit(1);
+                }
+            }
+        }
+        
         Command::UninstallLegacy(_) => {
             commands::uninstall::uninstall_legacy();
         }
@@ -1016,6 +1283,11 @@ fn print_help() {
     println!("    docker              Docker operations");
     println!("    security            Security tools");
     println!("    package             Package management");
+    println!("    file                File operations");
+    println!("    env                 Environment variables");
+    println!("    text                Text processing");
+    println!("    process             Process management");
+    println!("    archive             Archive operations");
     println!("    uninstall-legacy    Remove v6.0.0 PowerShell modules");
     println!();
     println!("EXAMPLES:");
