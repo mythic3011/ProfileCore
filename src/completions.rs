@@ -25,16 +25,17 @@ _profilecore_completions() {{
     prev="${{COMP_WORDS[COMP_CWORD-1]}}"
     
     # Top-level commands
-    commands="init completions system network git docker security package file uninstall-legacy"
+    commands="init completions system network git docker security package file env uninstall-legacy"
     
-    # Subcommands (updated with all 39 commands)
+    # Subcommands (updated with all 48 commands)
     system_cmds="info uptime processes disk-usage memory cpu"
     network_cmds="public-ip test-port local-ips dns reverse-dns whois trace ping"
-    git_cmds="status log switch-account add-account list-accounts whoami"
+    git_cmds="status log diff branch remote switch-account add-account list-accounts whoami"
     docker_cmds="ps stats logs"
     security_cmds="ssl-check gen-password check-password hash-password"
     package_cmds="install list search update upgrade remove info"
-    file_cmds="hash size"
+    file_cmds="hash size find permissions type"
+    env_cmds="list get set"
     
     case "${{COMP_CWORD}}" in
         1)
@@ -66,6 +67,9 @@ _profilecore_completions() {{
                 file)
                     COMPREPLY=($(compgen -W "${{file_cmds}}" -- "${{cur}}"))
                     ;;
+                env)
+                    COMPREPLY=($(compgen -W "${{env_cmds}}" -- "${{cur}}"))
+                    ;;
             esac
             ;;
     esac
@@ -91,6 +95,7 @@ _profilecore() {{
         'security:Security tools'
         'package:Package management'
         'file:File operations'
+        'env:Environment variables'
         'uninstall-legacy:Uninstall v6.0.0 modules'
     )
     
@@ -120,6 +125,9 @@ _profilecore() {{
     git_cmds=(
         'status:Show git status'
         'log:Show git log'
+        'diff:Show working tree changes'
+        'branch:List branches'
+        'remote:List remote repositories'
         'switch-account:Switch git account'
         'add-account:Add new git account'
         'list-accounts:List git accounts'
@@ -156,6 +164,16 @@ _profilecore() {{
     file_cmds=(
         'hash:Calculate file hash'
         'size:Get file/directory size'
+        'find:Find files by pattern'
+        'permissions:Show file permissions'
+        'type:Detect file type'
+    )
+    
+    local -a env_cmds
+    env_cmds=(
+        'list:List all environment variables'
+        'get:Get environment variable'
+        'set:Set environment variable'
     )
     
     if (( CURRENT == 2 )); then
@@ -186,6 +204,9 @@ _profilecore() {{
             file)
                 _describe 'file command' file_cmds
                 ;;
+            env)
+                _describe 'env command' env_cmds
+                ;;
         esac
     fi
 }}
@@ -208,6 +229,7 @@ complete -c profilecore -f -n "__fish_use_subcommand" -a "docker" -d "Docker ope
 complete -c profilecore -f -n "__fish_use_subcommand" -a "security" -d "Security tools"
 complete -c profilecore -f -n "__fish_use_subcommand" -a "package" -d "Package management"
 complete -c profilecore -f -n "__fish_use_subcommand" -a "file" -d "File operations"
+complete -c profilecore -f -n "__fish_use_subcommand" -a "env" -d "Environment variables"
 complete -c profilecore -f -n "__fish_use_subcommand" -a "uninstall-legacy" -d "Uninstall v6.0.0 modules"
 
 # Init/Completions shells
@@ -231,9 +253,12 @@ complete -c profilecore -f -n "__fish_seen_subcommand_from network" -a "whois" -
 complete -c profilecore -f -n "__fish_seen_subcommand_from network" -a "trace" -d "Traceroute"
 complete -c profilecore -f -n "__fish_seen_subcommand_from network" -a "ping" -d "Ping host"
 
-# Git subcommands (all 6 commands)
+# Git subcommands (all 9 commands)
 complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "status" -d "Show git status"
 complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "log" -d "Show git log"
+complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "diff" -d "Show working tree changes"
+complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "branch" -d "List branches"
+complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "remote" -d "List remotes"
 complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "switch-account" -d "Switch git account"
 complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "add-account" -d "Add git account"
 complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "list-accounts" -d "List accounts"
@@ -259,9 +284,17 @@ complete -c profilecore -f -n "__fish_seen_subcommand_from package" -a "upgrade"
 complete -c profilecore -f -n "__fish_seen_subcommand_from package" -a "remove" -d "Remove package"
 complete -c profilecore -f -n "__fish_seen_subcommand_from package" -a "info" -d "Show package information"
 
-# File subcommands (all 2 commands)
+# File subcommands (all 5 commands)
 complete -c profilecore -f -n "__fish_seen_subcommand_from file" -a "hash" -d "Calculate file hash"
 complete -c profilecore -f -n "__fish_seen_subcommand_from file" -a "size" -d "Get file/directory size"
+complete -c profilecore -f -n "__fish_seen_subcommand_from file" -a "find" -d "Find files by pattern"
+complete -c profilecore -f -n "__fish_seen_subcommand_from file" -a "permissions" -d "Show file permissions"
+complete -c profilecore -f -n "__fish_seen_subcommand_from file" -a "type" -d "Detect file type"
+
+# Environment variable subcommands (all 3 commands)
+complete -c profilecore -f -n "__fish_seen_subcommand_from env" -a "list" -d "List all environment variables"
+complete -c profilecore -f -n "__fish_seen_subcommand_from env" -a "get" -d "Get environment variable"
+complete -c profilecore -f -n "__fish_seen_subcommand_from env" -a "set" -d "Set environment variable"
 "#);
 }
 
@@ -282,17 +315,19 @@ Register-ArgumentCompleter -CommandName profilecore -ScriptBlock {{
         @{{ Name = 'security'; Description = 'Security tools' }}
         @{{ Name = 'package'; Description = 'Package management' }}
         @{{ Name = 'file'; Description = 'File operations' }}
+        @{{ Name = 'env'; Description = 'Environment variables' }}
         @{{ Name = 'uninstall-legacy'; Description = 'Uninstall legacy modules' }}
     )
     
-    # All 39 commands
+    # All 48 commands
     $systemCmds = @('info', 'uptime', 'processes', 'disk-usage', 'memory', 'cpu')
     $networkCmds = @('public-ip', 'test-port', 'local-ips', 'dns', 'reverse-dns', 'whois', 'trace', 'ping')
-    $gitCmds = @('status', 'log', 'switch-account', 'add-account', 'list-accounts', 'whoami')
+    $gitCmds = @('status', 'log', 'diff', 'branch', 'remote', 'switch-account', 'add-account', 'list-accounts', 'whoami')
     $dockerCmds = @('ps', 'stats', 'logs')
     $securityCmds = @('ssl-check', 'gen-password', 'check-password', 'hash-password')
     $packageCmds = @('install', 'list', 'search', 'update', 'upgrade', 'remove', 'info')
-    $fileCmds = @('hash', 'size')
+    $fileCmds = @('hash', 'size', 'find', 'permissions', 'type')
+    $envCmds = @('list', 'get', 'set')
     
     $tokens = $commandAst.ToString().Split(' ')
     
@@ -310,6 +345,7 @@ Register-ArgumentCompleter -CommandName profilecore -ScriptBlock {{
             'security' {{ $securityCmds }}
             'package' {{ $packageCmds }}
             'file' {{ $fileCmds }}
+            'env' {{ $envCmds }}
             default {{ @() }}
         }}
         
