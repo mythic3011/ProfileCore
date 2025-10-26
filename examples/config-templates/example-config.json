@@ -1,0 +1,25 @@
+{
+  "version": "4.1.0",
+  "theme": "default",
+  "features": {
+    "starship": true,
+    "psreadline": true,
+    "performance": true,
+    "plugins": true,
+    "cloudSync": false
+  },
+  "autoUpdate": {
+    "enabled": false,
+    "schedule": "Weekly"
+  },
+  "cache": {
+    "enabled": true,
+    "ttl": 300,
+    "maxSize": 1000
+  },
+  "plugins": {
+    "autoLoad": true,
+    "checkUpdates": false
+  }
+}
+

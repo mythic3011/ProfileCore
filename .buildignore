@@ -1,0 +1,52 @@
+# ProfileCore Build Ignore
+# Files and directories to exclude from releases
+
+# Version Control
+.git/
+.github/
+.gitignore
+.gitattributes
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+build/
+dist/
+*.zip
+*.tar.gz
+*.tgz
+
+# Tests
+tests/
+*.Tests.ps1
+test-*.ps1
+
+# Development
+.editorconfig
+.cursor/
+*.log
+*.bak
+*.tmp
+
+# Documentation archives
+docs/archives/
+
+# Node modules (if any)
+node_modules/
+
+# Python (if any)
+__pycache__/
+*.pyc
+.venv/
+
+# Temporary files
+*.temp
+.cache/
+

@@ -1,0 +1,92 @@
+[package]
+name = "profilecore"
+version = "1.0.0"
+edition = "2021"
+authors = ["Mythic3011"]
+description = "ProfileCore - Unified cross-shell interface to mature system tools"
+license = "MIT"
+repository = "https://github.com/mythic3011/ProfileCore"
+
+[[bin]]
+name = "profilecore"
+path = "src/main.rs"
+
+[dependencies]
+# FAST parsing (160ns vs clap's 5-10ms)
+gumdrop = "0.8"
+gumdrop_derive = "0.8"
+
+# Native implementations
+sysinfo = "0.31"                  # Cross-platform system information
+whoami = "1.5"                    # Hostname, username detection
+local-ip-address = "0.6"          # Local IP detection
+
+# Library wrappers
+git2 = "0.18"                     # Git operations
+bollard = "0.17"                  # Docker client
+trust-dns-resolver = "0.23"       # DNS resolution
+rustls = "0.23"                   # TLS/SSL
+rustls-native-certs = "0.7"       # Native cert store
+argon2 = "0.5"                    # Password hashing
+bcrypt = "0.15"                   # Password hashing
+zxcvbn = "3.1"                    # Password strength estimation
+
+# External CLI helpers
+which = "6.0"                     # Find executables in PATH
+tokio = { version = "1", features = ["rt", "process", "io-util", "net", "time"] }  # Async runtime
+futures = "0.3"                   # Async utilities
+
+# Networking
+reqwest = { version = "0.12", features = ["blocking", "rustls-tls"] }  # HTTP client
+
+# UX
+comfy-table = "7.1"               # Beautiful ASCII tables
+colored = "2.1"                   # ANSI colors
+indicatif = "0.17"                # Progress bars
+dialoguer = { version = "0.11", features = ["completion"] }  # Interactive prompts
+
+# Error handling
+anyhow = "1.0"                    # Convenient error handling
+
+# Serialization (for config)
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.9"
+toml = "0.8"
+
+# Utilities
+chrono = "0.4"                    # Date/time handling
+dirs = "5.0"                      # User directories
+regex = "1.11"                    # Regular expressions
+rand = "0.8"                      # Random generation
+
+[target.'cfg(windows)'.dependencies]
+# Windows-specific (minimal)
+winapi = { version = "0.3", features = ["std", "winuser", "processthreadsapi", "handleapi", "securitybaseapi"] }
+
+[target.'cfg(unix)'.dependencies]
+# Unix-specific (minimal)
+nix = { version = "0.29", features = ["user"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+# macOS-specific (minimal)  
+core-foundation = "0.9"
+
+[profile.release]
+opt-level = 3              # Maximum optimization
+lto = true                 # Link-time optimization
+codegen-units = 1          # Better optimization
+strip = true               # Strip debug symbols
+panic = "abort"            # Smaller binary, faster panic
+
+[profile.dev]
+opt-level = 0              # Fast compilation
+debug = true               # Debug symbols
+
+# Integration tests disabled - FFI functions can't be tested via extern "C" in same crate
+# FFI is tested when PowerShell loads the module
+# Unit tests in each module provide coverage of underlying functionality
+# 
+# [[test]]
+# name = "integration"
+# path = "tests/integration_tests.rs"

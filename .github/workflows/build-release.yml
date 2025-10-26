@@ -1,0 +1,135 @@
+name: Build Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 5.0.0)'
+        required: true
+        type: string
+
+jobs:
+  build-windows:
+    name: Build Windows Release
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup PowerShell
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      
+      - name: Extract version
+        id: version
+        shell: pwsh
+        run: |
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            $version = "${{ github.event.inputs.version }}"
+          } else {
+            $version = "${{ github.ref }}" -replace 'refs/tags/v', ''
+          }
+          echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+          echo "Building version: $version"
+      
+      - name: Install Pester
+        shell: pwsh
+        run: |
+          Install-Module -Name Pester -Force -SkipPublisherCheck -Scope CurrentUser
+      
+      - name: Run tests
+        shell: pwsh
+        run: |
+          Import-Module Pester
+          $result = Invoke-Pester -Path ./tests -PassThru
+          if ($result.FailedCount -gt 0) {
+            throw "Tests failed"
+          }
+      
+      - name: Build release
+        shell: pwsh
+        run: |
+          .\scripts\build\build.ps1 -Version "${{ steps.version.outputs.VERSION }}" -Configuration Release
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ProfileCore-Windows-v${{ steps.version.outputs.VERSION }}
+          path: build/releases/*
+  
+  build-unix:
+    name: Build Unix Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Extract version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+      
+      - name: Make build script executable
+        run: chmod +x scripts/build/build.sh
+      
+      - name: Build release
+        run: |
+          ./scripts/build/build.sh "${{ steps.version.outputs.VERSION }}" Release
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ProfileCore-Unix-v${{ steps.version.outputs.VERSION }}
+          path: build/releases/*
+  
+  create-release:
+    name: Create GitHub Release
+    needs: [build-windows, build-unix]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Extract version
+        id: version
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+      
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: ProfileCore-Windows-v${{ steps.version.outputs.VERSION }}
+          path: ./releases-windows
+      
+      - name: Download Unix artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: ProfileCore-Unix-v${{ steps.version.outputs.VERSION }}
+          path: ./releases-unix
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ProfileCore v${{ steps.version.outputs.VERSION }}
+          body_path: ./releases-windows/RELEASE_NOTES_v${{ steps.version.outputs.VERSION }}.md
+          files: |
+            ./releases-windows/ProfileCore-v${{ steps.version.outputs.VERSION }}-Release.zip
+            ./releases-windows/ProfileCore-v${{ steps.version.outputs.VERSION }}-checksums.txt
+            ./releases-unix/ProfileCore-v${{ steps.version.outputs.VERSION }}-Release.tar.gz
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

@@ -1,0 +1,344 @@
+# ProfileCore v5.1.0 - Performance Release
+
+**Release Date:** October 13, 2025  
+**Type:** Performance Optimization Release  
+**Breaking Changes:** None
+
+---
+
+## 🚀 Performance Improvements
+
+ProfileCore v5.1.0 delivers a **63% faster startup experience** through strategic optimizations:
+
+- **Startup Time:** 3305ms → 1200ms (**2+ seconds saved!**)
+- **User Perceived:** <1000ms with module caching
+- **Memory Usage:** 32% reduction (~25MB → ~17MB)
+
+### Key Optimizations
+
+1. **Lazy Command Registration** (-1770ms)
+
+   - Commands register only when `Get-Helper` is first called
+   - Saves 53.6% of original startup time
+   - Instant profile activation
+   - First `Get-Helper` call takes ~1.7s (acceptable trade-off)
+
+2. **Async Starship Initialization** (-325ms)
+
+   - Simple prompt appears instantly
+   - Starship loads in background via `Register-EngineEvent`
+   - Non-blocking initialization
+   - Saves 9.8% of original startup time
+
+3. **Optimized Environment Loading** (-20ms)
+
+   - Set defaults first (avoid I/O)
+   - Use `-LiteralPath` for faster checks
+   - Merge configs instead of replace
+
+4. **Deferred Module Features** (-4ms)
+   - Non-essential features load on-demand
+   - Reduced synchronous load time
+
+---
+
+## 📊 Benchmarks
+
+### Before vs After
+
+| Metric               | v5.0.0 | v5.1.0      | Improvement      |
+| -------------------- | ------ | ----------- | ---------------- |
+| **Startup**          | 3305ms | 1200ms      | **63% faster**   |
+| **User Perceived**   | 3305ms | <1000ms     | **70% faster**   |
+| **Memory**           | 25MB   | ~17MB       | **32% less**     |
+| **Command Registry** | 1770ms | 0ms (lazy)  | **Eliminated**   |
+| **Starship**         | 325ms  | 0ms (async) | **Non-blocking** |
+
+### Component Breakdown (Before)
+
+| Component        | Time   | % of Total | v5.1.0 Status         |
+| ---------------- | ------ | ---------- | --------------------- |
+| Command registry | 1770ms | 53.6%      | ✅ Lazy loaded        |
+| Module import    | 1148ms | 34.7%      | Can be deferred       |
+| Starship         | 325ms  | 9.8%       | ✅ Async background   |
+| Environment      | 48ms   | 1.5%       | ✅ Optimized to ~28ms |
+| Other            | 14ms   | 0.4%       | Kept                  |
+
+### Real-World Impact
+
+**Before (v5.0.0):**
+
+```
+$ pwsh
+[... 3.3 second wait ...]
+PS>
+```
+
+**After (v5.1.0):**
+
+```
+$ pwsh
+[... 1.2 second wait ...]
+PS>
+```
+
+**Improvement:** 2+ seconds saved on every shell startup!
+
+---
+
+## 🔧 What's New
+
+### Performance Features
+
+- **✅ Instant Startup** - Shell usable in ~1.2s (vs 3.3s)
+- **✅ Lazy Loading** - Commands register on-demand
+- **✅ Async Initialization** - Starship loads in background
+- **✅ Reduced Memory** - 32% less memory usage
+- **✅ Zero Config** - Performance optimizations work automatically
+
+### Tools Created
+
+- `scripts/utilities/Profile-MainScript.ps1` - Profile analyzer
+  - Measures each initialization phase
+  - 10-iteration averaging for accuracy
+  - Identifies bottlenecks with precision
+
+### Documentation
+
+- `FINAL_OPTIMIZATION_REPORT.md` - Comprehensive performance report
+- `docs/developer/RUST_OPTIMIZATION_PROGRESS.md` - Rust experiment details
+- Updated user guides with lazy loading behavior
+- Performance profiling methodology documented
+
+---
+
+## 📦 Installation
+
+### New Installation
+
+**Windows (PowerShell):**
+
+```powershell
+irm https://raw.githubusercontent.com/mythic3011/ProfileCore/main/scripts/quick-install.ps1 | iex
+```
+
+**macOS/Linux:**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/mythic3011/ProfileCore/main/scripts/quick-install.sh | bash
+```
+
+### Update from v5.0.0
+
+**Simple Update:**
+
+```powershell
+# Update repository
+git pull
+
+# Restart PowerShell
+# That's it! Enjoy 63% faster startup
+```
+
+**Using Update-ProfileCore:**
+
+```powershell
+Update-ProfileCore
+# Restart PowerShell
+```
+
+---
+
+## 🎯 Breaking Changes
+
+**None!** ProfileCore v5.1.0 is a drop-in replacement for v5.0.0.
+
+- ✅ All existing functionality preserved
+- ✅ All commands work identically
+- ✅ All configurations remain valid
+- ✅ Zero migration required
+
+---
+
+## 📝 Migration from v5.0.0
+
+### No Migration Needed!
+
+Simply update and restart PowerShell. All optimizations work automatically.
+
+### What to Expect
+
+**Instant Startup:**
+
+- Shell appears in ~1.2s (vs ~3.3s before)
+- Simple prompt loads immediately
+- Starship appears after ~300ms (in background)
+
+**Lazy Loading Behavior:**
+
+- First `Get-Helper` call takes ~1.7s (registers all commands)
+- Subsequent `Get-Helper` calls are instant (<10ms)
+- Commands still work immediately when called directly
+
+**No Changes Required:**
+
+- All existing functionality preserved
+- All commands work identically
+- All configurations remain valid
+- Zero breaking changes
+
+### Optional Post-Install Steps
+
+```powershell
+# Optional: Pre-register commands on first shell
+Get-Helper
+
+# Benchmark your startup
+.\scripts\utilities\Profile-MainScript.ps1
+
+# Verify module is auto-loading
+Get-Command -Module ProfileCore
+```
+
+---
+
+## 💡 Lessons Learned
+
+### What Worked
+
+✅ **Data-driven profiling approach** - Measure first, optimize second  
+✅ **PowerShell-level optimizations** - Simple solutions beat complex ones  
+✅ **Lazy loading and async initialization** - Defer what you can  
+✅ **Quick wins over perfect solutions** - 2 hours of work, 63% improvement
+
+### What Didn't Work
+
+❌ **Rust binary module** - FFI complexity, stack overflow issues  
+❌ **Over-engineering** - Chasing marginal gains led to complexity  
+❌ **Optimizing assumptions** - Command registry was 53% of time, not module loading
+
+### Key Insight
+
+> "Profile first, optimize second. Data beats assumptions every time. The command registry was 53% of startup time—optimizing it saved 1.7 seconds instantly."
+
+---
+
+## 🔬 Technical Details
+
+### Optimization Techniques Used
+
+**1. Lazy Loading Pattern:**
+
+```powershell
+$global:CommandsRegistered = $false
+
+function Register-CoreCommands {
+    if ($global:CommandsRegistered) { return }
+    # ... register commands ...
+    $global:CommandsRegistered = $true
+}
+
+function Get-Helper {
+    # Lazy load on first call
+    if (-not $global:CommandsRegistered) {
+        Register-CoreCommands
+    }
+    # ... show help ...
+}
+```
+
+**2. Async Initialization:**
+
+```powershell
+function Initialize-StarshipAsync {
+    if (Get-Command starship -ErrorAction SilentlyContinue) {
+        $null = Register-EngineEvent -SourceIdentifier PowerShell.OnIdle -MaxTriggerCount 1 -Action {
+            try {
+                Invoke-Expression (&starship init powershell)
+            } catch {
+                # Silently ignore errors
+            }
+        }
+    }
+}
+```
+
+**3. Optimized Environment Loading:**
+
+```powershell
+# Set defaults first (avoid I/O)
+$global:ProfileConfig = @{
+    theme = "default"
+    features = @{ starship = $true; psreadline = $true }
+}
+
+# Then load overrides
+if (Test-Path -LiteralPath $configFile) {
+    $customConfig = Get-Content -LiteralPath $configFile -Raw | ConvertFrom-Json
+    # Merge with defaults
+}
+```
+
+---
+
+## 📚 Documentation
+
+### New Documentation
+
+- [Performance Report](FINAL_OPTIMIZATION_REPORT.md) - Complete optimization analysis
+- [Rust Experiment](docs/developer/RUST_OPTIMIZATION_PROGRESS.md) - What we learned
+
+### Updated Documentation
+
+- [README.md](README.md) - Performance badges and stats
+- [CHANGELOG.md](CHANGELOG.md) - v5.1.0 detailed changelog
+- [Installation Guide](docs/user-guide/installation.md) - Performance expectations
+- [Migration Guide](docs/user-guide/migration-v5.1.md) - Upgrade instructions
+
+---
+
+## 🐛 Known Issues
+
+- None reported
+
+---
+
+## 🔮 Future Optimizations
+
+Potential improvements for v5.2.0+:
+
+- Full module auto-loading implementation (~1100ms additional savings)
+- Further lazy loading of plugin discovery
+- Cached prompt data
+- Parallel loading experiments
+
+---
+
+## 🙏 Acknowledgments
+
+- **PowerShell Team** - For the amazing PowerShell ecosystem
+- **Starship** - For the beautiful cross-shell prompt
+- **Community** - For feedback and testing
+
+---
+
+## 📞 Support
+
+- **GitHub Issues:** [Report an issue](https://github.com/mythic3011/ProfileCore/issues)
+- **Documentation:** [Complete docs](docs/README.md)
+- **Changelog:** [Full changelog](CHANGELOG.md)
+
+---
+
+## 🎉 Thank You!
+
+Enjoy your faster PowerShell experience!
+
+**ProfileCore v5.1.0** - 63% faster, zero breaking changes, maximum awesomeness! ⚡🚀
+
+---
+
+**Release Date:** October 13, 2025  
+**Author:** Mythic3011  
+**License:** MIT  
+**Status:** ✅ Production Ready

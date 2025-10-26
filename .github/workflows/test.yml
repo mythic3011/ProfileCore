@@ -1,0 +1,211 @@
+name: Test ProfileCore
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  test-windows:
+    name: Test on Windows
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PowerShell modules
+        shell: pwsh
+        run: |
+          Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+          Install-Module -Name Pester -MinimumVersion 5.0.0 -Force -SkipPublisherCheck
+          Install-Module -Name PSScriptAnalyzer -Force -SkipPublisherCheck
+
+      - name: Display PowerShell version
+        shell: pwsh
+        run: |
+          $PSVersionTable
+
+      - name: Import ProfileCore module
+        shell: pwsh
+        run: |
+          Import-Module ./modules/ProfileCore/ProfileCore.psd1 -Force -Verbose
+          Get-Module ProfileCore
+
+      - name: Run PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          $results = Invoke-ScriptAnalyzer -Path ./modules/ProfileCore -Recurse -Settings ./config/analyzer-settings.psd1
+          if ($results) {
+            $results | Format-Table -AutoSize
+            Write-Error "PSScriptAnalyzer found $($results.Count) issues"
+          } else {
+            Write-Host "✅ No PSScriptAnalyzer issues found" -ForegroundColor Green
+          }
+
+      - name: Run Unit Tests
+        shell: pwsh
+        run: |
+          $config = New-PesterConfiguration
+          $config.Run.Path = './tests/unit'
+          $config.Run.Exit = $true
+          $config.Output.Verbosity = 'Detailed'
+          $config.TestResult.Enabled = $true
+          $config.TestResult.OutputPath = './test-results-unit.xml'
+          $config.TestResult.OutputFormat = 'NUnitXml'
+
+          Invoke-Pester -Configuration $config
+
+      - name: Run Integration Tests
+        shell: pwsh
+        run: |
+          $config = New-PesterConfiguration
+          $config.Run.Path = './tests/integration'
+          $config.Run.Exit = $true
+          $config.Output.Verbosity = 'Detailed'
+          $config.TestResult.Enabled = $true
+          $config.TestResult.OutputPath = './test-results-integration.xml'
+          $config.TestResult.OutputFormat = 'NUnitXml'
+
+          Invoke-Pester -Configuration $config
+
+      - name: Run E2E Tests
+        shell: pwsh
+        run: |
+          $config = New-PesterConfiguration
+          $config.Run.Path = './tests/e2e'
+          $config.Run.Exit = $true
+          $config.Output.Verbosity = 'Detailed'
+          $config.TestResult.Enabled = $true
+          $config.TestResult.OutputPath = './test-results-e2e.xml'
+          $config.TestResult.OutputFormat = 'NUnitXml'
+
+          Invoke-Pester -Configuration $config
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-windows
+          path: |
+            test-results-*.xml
+          retention-days: 30
+
+  test-linux:
+    name: Test on Linux
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PowerShell modules
+        shell: pwsh
+        run: |
+          Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+          Install-Module -Name Pester -MinimumVersion 5.0.0 -Force
+          Install-Module -Name PSScriptAnalyzer -Force
+
+      - name: Display PowerShell version
+        shell: pwsh
+        run: |
+          $PSVersionTable
+
+      - name: Import ProfileCore module
+        shell: pwsh
+        run: |
+          Import-Module ./modules/ProfileCore/ProfileCore.psd1 -Force -Verbose
+          Get-Module ProfileCore
+
+      - name: Run Unit Tests
+        shell: pwsh
+        run: |
+          $config = New-PesterConfiguration
+          $config.Run.Path = './tests/unit'
+          $config.Run.Exit = $true
+          $config.Output.Verbosity = 'Detailed'
+          $config.TestResult.Enabled = $true
+          $config.TestResult.OutputPath = './test-results-unit-linux.xml'
+          $config.TestResult.OutputFormat = 'NUnitXml'
+
+          Invoke-Pester -Configuration $config
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-linux
+          path: |
+            test-results-*.xml
+          retention-days: 30
+
+  test-macos:
+    name: Test on macOS
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PowerShell modules
+        shell: pwsh
+        run: |
+          Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+          Install-Module -Name Pester -MinimumVersion 5.0.0 -Force
+          Install-Module -Name PSScriptAnalyzer -Force
+
+      - name: Display PowerShell version
+        shell: pwsh
+        run: |
+          $PSVersionTable
+
+      - name: Import ProfileCore module
+        shell: pwsh
+        run: |
+          Import-Module ./modules/ProfileCore/ProfileCore.psd1 -Force -Verbose
+          Get-Module ProfileCore
+
+      - name: Run Unit Tests
+        shell: pwsh
+        run: |
+          $config = New-PesterConfiguration
+          $config.Run.Path = './tests/unit'
+          $config.Run.Exit = $true
+          $config.Output.Verbosity = 'Detailed'
+          $config.TestResult.Enabled = $true
+          $config.TestResult.OutputPath = './test-results-unit-macos.xml'
+          $config.TestResult.OutputFormat = 'NUnitXml'
+
+          Invoke-Pester -Configuration $config
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-macos
+          path: |
+            test-results-*.xml
+          retention-days: 30
+
+  publish-results:
+    name: Publish Test Results
+    needs: [test-windows, test-linux, test-macos]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Download all test results
+        uses: actions/download-artifact@v4
+        with:
+          path: test-results
+
+      - name: Publish test results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: |
+            test-results/**/*.xml
+          check_name: Test Results
+          comment_mode: off

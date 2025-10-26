@@ -1,0 +1,38 @@
+{
+  "vscode": {
+    "windows": "C:\\Program Files\\Microsoft VS Code\\Code.exe",
+    "macos": "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+    "linux": "/usr/bin/code"
+  },
+  "chrome": {
+    "windows": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "macos": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "linux": "/usr/bin/google-chrome"
+  },
+  "firefox": {
+    "windows": "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
+    "macos": "/Applications/Firefox.app/Contents/MacOS/firefox",
+    "linux": "/usr/bin/firefox"
+  },
+  "git": {
+    "windows": "C:\\Program Files\\Git\\cmd\\git.exe",
+    "macos": "/usr/bin/git",
+    "linux": "/usr/bin/git"
+  },
+  "docker": {
+    "windows": "C:\\Program Files\\Docker\\Docker\\Docker Desktop.exe",
+    "macos": "/Applications/Docker.app",
+    "linux": "/usr/bin/docker"
+  },
+  "node": {
+    "windows": "C:\\Program Files\\nodejs\\node.exe",
+    "macos": "/usr/local/bin/node",
+    "linux": "/usr/bin/node"
+  },
+  "python": {
+    "windows": "C:\\Python311\\python.exe",
+    "macos": "/usr/local/bin/python3",
+    "linux": "/usr/bin/python3"
+  }
+}
+

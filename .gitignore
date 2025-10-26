@@ -1,0 +1,240 @@
+# ProfileCore .gitignore
+# Updated: 2025-10-27 for v5.2.0 with v6 DI architecture
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  MODULE TRACKING (Explicit Includes)
+# ═════════════════════════════════════════════════════════════════════════════
+# Track core modules (override general ignore patterns)
+!modules/ProfileCore/
+!modules/ProfileCore.Common/
+!modules/deprecated-v5.2/
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  RUST BINARIES & BUILD ARTIFACTS
+# ═════════════════════════════════════════════════════════════════════════════
+# Rust build artifacts (v1.0.0 - root-level Rust project)
+target/
+Cargo.lock
+
+# Rust compiled binaries
+*.pdb
+*.exp
+*.lib
+
+# OLD (v6.0.0) - kept for backward compatibility
+modules/ProfileCore/rust-binary/bin/*.dll
+modules/ProfileCore/rust-binary/bin/*.so
+modules/ProfileCore/rust-binary/bin/*.dylib
+modules/ProfileCore-rs/target/
+
+# Build outputs
+bin/
+obj/
+dist/
+build/staging/
+build/output/
+*.nupkg
+*.nuspec
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  USER-SPECIFIC FILES & BACKUPS
+# ═════════════════════════════════════════════════════════════════════════════
+# Backup files (timestamped backups from installers)
+*.backup
+*_backup
+*.bak
+*.old
+*.tmp
+*.psm1.bak
+*.psd1.bak
+*.backup.*
+*.[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9][0-9][0-9].backup
+
+# Profile backups
+Microsoft.PowerShell_profile.ps1.*.backup
+Microsoft.PowerShell_profile.ps1.backup
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  LOGS & CACHE
+# ═════════════════════════════════════════════════════════════════════════════
+# Application logs
+*.log
+logs/
+*.profilecore/logs/
+.profilecore/logs/
+
+# Cache files
+cache/
+*.cache
+.profilecore/cache/
+.profilecore_last_check
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  USER CONFIGURATION
+# ═════════════════════════════════════════════════════════════════════════════
+# Keep templates (examples/), ignore actual user configs
+.env
+*.env.local
+config.local.json
+paths.local.json
+aliases.local.json
+~/.config/shell-profile/.env
+~/.config/shell-profile/*.local.json
+
+# Plugin user data (keep plugin code, ignore runtime data)
+.profilecore/plugins/*/config.json
+.profilecore/plugins/*/data/
+.profilecore/plugins/*/*.log
+
+# Sync data (cloud sync feature)
+.profilecore/sync/sync-config.json
+.profilecore/backups/
+.profilecore/state.json
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  TEST RESULTS & COVERAGE
+# ═════════════════════════════════════════════════════════════════════════════
+TestResults/
+coverage/
+*.trx
+*.coverage
+.coverage
+htmlcov/
+benchmark-results/
+*.benchmark
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  IDE & EDITOR FILES
+# ═════════════════════════════════════════════════════════════════════════════
+# VSCode
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+.vscode/.ropeproject
+!.vscode/extensions.json
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Vim
+*.swp
+*.swo
+*~
+.*.sw?
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  OPERATING SYSTEM FILES
+# ═════════════════════════════════════════════════════════════════════════════
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+.directory
+.Trash-*
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  LANGUAGE-SPECIFIC (Examples & Dependencies)
+# ═════════════════════════════════════════════════════════════════════════════
+# PowerShell
+*.ps1xml
+
+# Node.js (if examples use Node)
+node_modules/
+package-lock.json
+yarn.lock
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python (if examples use Python)
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.python-version
+venv/
+.venv/
+ENV/
+env/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Ruby (if examples use Ruby)
+Gemfile.lock
+.bundle/
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  SECURITY & SECRETS
+# ═════════════════════════════════════════════════════════════════════════════
+# Prevent accidental commit of secrets
+*.key
+*.pem
+*.cer
+*.crt
+*.pfx
+secrets.json
+credentials.json
+.secrets/
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  PERSONAL & TEMPORARY FILES
+# ═════════════════════════════════════════════════════════════════════════════
+# Installed script tracking (PSGallery)
+scripts/InstalledScriptInfos/
+
+# Personal notes and planning
+NOTES.md
+TODO.md
+PERSONAL.md
+SCRATCH.md
+.plan.md
+.notes/
+
+# Temporary downloads
+*.download
+temp/
+tmp/
+*.tmp.*
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  DOCUMENTATION THAT SHOULD BE TRACKED
+# ═════════════════════════════════════════════════════════════════════════════
+# Everything in docs/ should be tracked (override above patterns)
+!docs/**/*.md
+!docs/**/*.ps1
+!docs/**/*.json
+
+# Keep examples tracked
+!examples/**/*
+
+# Keep module documentation
+!modules/**/README.md
+!modules/**/*.md
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  END OF .gitignore
+# ═════════════════════════════════════════════════════════════════════════════

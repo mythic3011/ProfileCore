@@ -1,0 +1,265 @@
+# ProfileCore Unified Starship Configuration
+# Works across PowerShell, Bash, Zsh, and Fish
+#
+# This configuration provides a beautiful, consistent prompt experience
+# across all shells with Rust-powered performance.
+
+# Main prompt format
+format = """
+[┌───────────────────────────────────────────────────>](bold green)
+[│](bold green) $username$hostname$directory$git_branch$git_status$rust$python$nodejs$docker_context
+[└─>](bold green) $character"""
+
+# Right-side prompt
+right_format = """$cmd_duration $time"""
+
+# Continuation prompt
+continuation_prompt = "[∙](bright-black) "
+
+# Character symbols
+[character]
+success_symbol = "[➜](bold green)"
+error_symbol = "[✗](bold red)"
+vicmd_symbol = "[V](bold yellow)"
+
+# Directory display
+[directory]
+style = "blue bold"
+truncation_length = 3
+truncate_to_repo = true
+format = "[$path]($style)[$read_only]($read_only_style) "
+read_only = " 🔒"
+read_only_style = "red"
+truncation_symbol = "…/"
+home_symbol = "~"
+
+# Git branch
+[git_branch]
+symbol = " "
+style = "bold purple"
+format = "[$symbol$branch(:$remote_branch)]($style) "
+truncation_length = 25
+truncation_symbol = "…"
+only_attached = false
+
+# Git status
+[git_status]
+style = "bold yellow"
+format = "([$all_status$ahead_behind]($style) )"
+conflicted = "🏳"
+ahead = "⇡${count}"
+behind = "⇣${count}"
+diverged = "⇕⇡${ahead_count}⇣${behind_count}"
+untracked = "🤷"
+stashed = "📦"
+modified = "📝"
+staged = '[++\($count\)](green)'
+renamed = "👅"
+deleted = "🗑"
+disabled = false
+
+# Git commit
+[git_commit]
+commit_hash_length = 7
+style = "bold green"
+only_detached = true
+format = "[($hash$tag)]($style) "
+tag_disabled = false
+tag_symbol = " 🏷  "
+
+# Git state (rebase, merge, etc.)
+[git_state]
+rebase = "REBASING"
+merge = "MERGING"
+revert = "REVERTING"
+cherry_pick = "CHERRY-PICKING"
+bisect = "BISECTING"
+am = "AM"
+am_or_rebase = "AM/REBASE"
+style = "bold yellow"
+format = '\([$state( $progress_current/$progress_total)]($style)\) '
+
+# Language versions
+
+[rust]
+symbol = " "
+style = "bold red"
+format = "[$symbol($version )]($style)"
+disabled = false
+
+[python]
+symbol = " "
+style = "bold yellow"
+format = '[${symbol}${pyenv_prefix}(${version} )(\($virtualenv\) )]($style)'
+pyenv_version_name = false
+disabled = false
+
+[nodejs]
+symbol = " "
+style = "bold green"
+format = "[$symbol($version )]($style)"
+disabled = false
+
+[golang]
+symbol = " "
+style = "bold cyan"
+format = "[$symbol($version )]($style)"
+disabled = false
+
+[java]
+symbol = " "
+style = "bold red"
+format = "[$symbol($version )]($style)"
+disabled = false
+
+[docker_context]
+symbol = " "
+style = "bold blue"
+format = "[$symbol$context]($style) "
+only_with_files = true
+disabled = false
+
+[kubernetes]
+symbol = "☸ "
+style = "bold blue"
+format = '[$symbol$context( \($namespace\))]($style) '
+disabled = false
+
+# Command duration
+[cmd_duration]
+min_time = 500
+style = "bold yellow"
+format = "took [$duration]($style) "
+show_milliseconds = false
+show_notifications = false
+
+# Time display
+[time]
+disabled = false
+style = "bold white"
+format = '🕙[$time]($style) '
+time_format = "%T"
+use_12hr = false
+
+# Username
+[username]
+style_user = "white bold"
+style_root = "red bold"
+format = "[$user]($style)"
+disabled = false
+show_always = false  # Only show when different from default
+
+# Hostname
+[hostname]
+ssh_only = false
+style = "bold yellow"
+format = "[@$hostname]($style) "
+disabled = false
+
+# Battery
+[battery]
+full_symbol = "🔋"
+charging_symbol = "⚡️"
+discharging_symbol = "💀"
+unknown_symbol = "❓"
+empty_symbol = "🪫"
+
+[[battery.display]]
+threshold = 10
+style = "bold red"
+
+[[battery.display]]
+threshold = 30
+style = "bold yellow"
+
+[[battery.display]]
+threshold = 100
+style = "bold green"
+
+# Memory usage
+[memory_usage]
+disabled = true
+threshold = 75
+symbol = " "
+style = "bold dimmed white"
+format = "$symbol[$ram( | $swap)]($style) "
+
+# Jobs
+[jobs]
+symbol = "✦"
+style = "bold blue"
+number_threshold = 1
+format = "[$symbol$number]($style) "
+
+# Package version
+[package]
+symbol = "📦 "
+style = "bold 208"
+format = "[$symbol$version]($style) "
+disabled = false
+
+# Status
+[status]
+style = "red bold"
+symbol = "✖"
+format = '[\[$symbol $common_meaning$signal_name$maybe_int\]]($style) '
+map_symbol = true
+disabled = false
+
+# AWS
+[aws]
+symbol = "☁️  "
+style = "bold yellow"
+format = '[$symbol($profile )(\($region\) )(\[$duration\] )]($style)'
+disabled = false
+
+# Azure
+[azure]
+disabled = false
+format = '[$symbol($subscription)]($style) '
+symbol = "ﴃ "
+style = "blue bold"
+
+# GCloud
+[gcloud]
+symbol = "☁️  "
+style = "bold blue"
+format = '[$symbol$account(@$domain)(\($region\))]($style) '
+disabled = false
+
+# Shell indicator
+[shell]
+fish_indicator = ""
+powershell_indicator = "_"
+bash_indicator = "bsh"
+zsh_indicator = "zsh"
+unknown_indicator = "?"
+style = "cyan bold"
+format = "[$indicator]($style) "
+disabled = true  # Enable if you want shell indicator
+
+# Line break
+[line_break]
+disabled = false
+
+# Nix shell
+[nix_shell]
+disabled = false
+impure_msg = '[impure](bold red)'
+pure_msg = '[pure](bold green)'
+format = 'via [☃️ $state( \($name\))]($style) '
+
+# Environment variable
+[env_var]
+symbol = "🌍 "
+style = "bold dimmed black"
+disabled = true
+
+# Custom commands (examples)
+# [custom.example]
+# command = "echo foo"
+# when = "true"
+# symbol = "🔔"
+# style = "bold green"
+# format = "[$symbol($output )]($style)"
+

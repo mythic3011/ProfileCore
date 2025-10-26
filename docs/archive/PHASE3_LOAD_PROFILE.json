@@ -1,0 +1,293 @@
+{
+  "FileCount": 43,
+  "CategoryStats": [
+    {
+      "Category": "Private",
+      "Files": 18,
+      "TotalMs": 283.68,
+      "AvgMs": 15.76,
+      "Percent": 83.0
+    },
+    {
+      "Category": "Public",
+      "Files": 25,
+      "TotalMs": 244.59,
+      "AvgMs": 9.78,
+      "Percent": 71.5
+    }
+  ],
+  "Recommendations": {
+    "PotentialSavingsMs": 106.0,
+    "LazyLoadCandidates": [
+      "OSDetection.ps1",
+      "PluginFrameworkV2.ps1"
+    ],
+    "SlowFilesCount": 2,
+    "TargetLoadTimeMs": 236.0
+  },
+  "Timestamp": "2025-10-11 18:28:45",
+  "TotalLoadTimeMs": 341.88,
+  "PublicFilesMs": 244.58999999999995,
+  "InitializationMs": -186.39,
+  "Files": [
+    {
+      "Category": "Private",
+      "FileName": "OSDetection.ps1",
+      "TimeMs": 62.88,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\scripts\\utilities\\..\\..\\modules\\ProfileCore\\private\\OSDetection.ps1"
+    },
+    {
+      "Category": "Private",
+      "FileName": "PluginFrameworkV2.ps1",
+      "TimeMs": 43.0,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\scripts\\utilities\\..\\..\\modules\\ProfileCore\\private\\PluginFrameworkV2.ps1"
+    },
+    {
+      "Category": "Public",
+      "FileName": "PackageManagerV2.ps1",
+      "TimeMs": 19.24,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\modules\\ProfileCore\\public\\PackageManagerV2.ps1"
+    },
+    {
+      "Category": "Private",
+      "FileName": "PackageManagerProvider.ps1",
+      "TimeMs": 15.3,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\scripts\\utilities\\..\\..\\modules\\ProfileCore\\private\\PackageManagerProvider.ps1"
+    },
+    {
+      "Category": "Private",
+      "FileName": "CommandHandler.ps1",
+      "TimeMs": 15.17,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\scripts\\utilities\\..\\..\\modules\\ProfileCore\\private\\CommandHandler.ps1"
+    },
+    {
+      "Category": "Private",
+      "FileName": "ConfigurationProvider.ps1",
+      "TimeMs": 13.18,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\scripts\\utilities\\..\\..\\modules\\ProfileCore\\private\\ConfigurationProvider.ps1"
+    },
+    {
+      "Category": "Private",
+      "FileName": "OSAbstraction.ps1",
+      "TimeMs": 12.33,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\scripts\\utilities\\..\\..\\modules\\ProfileCore\\private\\OSAbstraction.ps1"
+    },
+    {
+      "Category": "Private",
+      "FileName": "PluginFramework.ps1",
+      "TimeMs": 11.74,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\scripts\\utilities\\..\\..\\modules\\ProfileCore\\private\\PluginFramework.ps1"
+    },
+    {
+      "Category": "Private",
+      "FileName": "ServiceContainer.ps1",
+      "TimeMs": 11.66,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\scripts\\utilities\\..\\..\\modules\\ProfileCore\\private\\ServiceContainer.ps1"
+    },
+    {
+      "Category": "Private",
+      "FileName": "UpdateManager.ps1",
+      "TimeMs": 11.16,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\scripts\\utilities\\..\\..\\modules\\ProfileCore\\private\\UpdateManager.ps1"
+    },
+    {
+      "Category": "Private",
+      "FileName": "UpdateProvider.ps1",
+      "TimeMs": 11.15,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\scripts\\utilities\\..\\..\\modules\\ProfileCore\\private\\UpdateProvider.ps1"
+    },
+    {
+      "Category": "Public",
+      "FileName": "LogManagement.ps1",
+      "TimeMs": 10.89,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\modules\\ProfileCore\\public\\LogManagement.ps1"
+    },
+    {
+      "Category": "Private",
+      "FileName": "SecretManager.ps1",
+      "TimeMs": 10.21,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\scripts\\utilities\\..\\..\\modules\\ProfileCore\\private\\SecretManager.ps1"
+    },
+    {
+      "Category": "Private",
+      "FileName": "LoggingProvider.ps1",
+      "TimeMs": 10.08,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\scripts\\utilities\\..\\..\\modules\\ProfileCore\\private\\LoggingProvider.ps1"
+    },
+    {
+      "Category": "Public",
+      "FileName": "DNSTools.ps1",
+      "TimeMs": 10.06,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\modules\\ProfileCore\\public\\DNSTools.ps1"
+    },
+    {
+      "Category": "Private",
+      "FileName": "PerformanceMetrics.ps1",
+      "TimeMs": 10.02,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\scripts\\utilities\\..\\..\\modules\\ProfileCore\\private\\PerformanceMetrics.ps1"
+    },
+    {
+      "Category": "Public",
+      "FileName": "AsyncCommands.ps1",
+      "TimeMs": 9.97,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\modules\\ProfileCore\\public\\AsyncCommands.ps1"
+    },
+    {
+      "Category": "Public",
+      "FileName": "PackageSearch.ps1",
+      "TimeMs": 9.91,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\modules\\ProfileCore\\public\\PackageSearch.ps1"
+    },
+    {
+      "Category": "Public",
+      "FileName": "AdvancedPerformanceCommands.ps1",
+      "TimeMs": 9.9,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\modules\\ProfileCore\\public\\AdvancedPerformanceCommands.ps1"
+    },
+    {
+      "Category": "Public",
+      "FileName": "CloudSyncCommands.ps1",
+      "TimeMs": 9.82,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\modules\\ProfileCore\\public\\CloudSyncCommands.ps1"
+    },
+    {
+      "Category": "Public",
+      "FileName": "NetworkSecurity.ps1",
+      "TimeMs": 9.79,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\modules\\ProfileCore\\public\\NetworkSecurity.ps1"
+    },
+    {
+      "Category": "Private",
+      "FileName": "CloudSync.ps1",
+      "TimeMs": 9.79,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\scripts\\utilities\\..\\..\\modules\\ProfileCore\\private\\CloudSync.ps1"
+    },
+    {
+      "Category": "Public",
+      "FileName": "DockerTools.ps1",
+      "TimeMs": 9.79,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\modules\\ProfileCore\\public\\DockerTools.ps1"
+    },
+    {
+      "Category": "Public",
+      "FileName": "GitTools.ps1",
+      "TimeMs": 9.77,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\modules\\ProfileCore\\public\\GitTools.ps1"
+    },
+    {
+      "Category": "Public",
+      "FileName": "SystemTools.ps1",
+      "TimeMs": 9.76,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\modules\\ProfileCore\\public\\SystemTools.ps1"
+    },
+    {
+      "Category": "Private",
+      "FileName": "CacheProvider.ps1",
+      "TimeMs": 9.75,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\scripts\\utilities\\..\\..\\modules\\ProfileCore\\private\\CacheProvider.ps1"
+    },
+    {
+      "Category": "Public",
+      "FileName": "PluginManagement.ps1",
+      "TimeMs": 9.69,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\modules\\ProfileCore\\public\\PluginManagement.ps1"
+    },
+    {
+      "Category": "Public",
+      "FileName": "PerformanceMonitor.ps1",
+      "TimeMs": 9.57,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\modules\\ProfileCore\\public\\PerformanceMonitor.ps1"
+    },
+    {
+      "Category": "Public",
+      "FileName": "WebSecurity.ps1",
+      "TimeMs": 9.56,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\modules\\ProfileCore\\public\\WebSecurity.ps1"
+    },
+    {
+      "Category": "Public",
+      "FileName": "CacheManagement.ps1",
+      "TimeMs": 9.45,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\modules\\ProfileCore\\public\\CacheManagement.ps1"
+    },
+    {
+      "Category": "Public",
+      "FileName": "LazyLoader.ps1",
+      "TimeMs": 9.28,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\modules\\ProfileCore\\public\\LazyLoader.ps1"
+    },
+    {
+      "Category": "Public",
+      "FileName": "ConfigurationManagement.ps1",
+      "TimeMs": 9.12,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\modules\\ProfileCore\\public\\ConfigurationManagement.ps1"
+    },
+    {
+      "Category": "Public",
+      "FileName": "ProjectTools.ps1",
+      "TimeMs": 9.09,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\modules\\ProfileCore\\public\\ProjectTools.ps1"
+    },
+    {
+      "Category": "Public",
+      "FileName": "FileOperations.ps1",
+      "TimeMs": 8.97,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\modules\\ProfileCore\\public\\FileOperations.ps1"
+    },
+    {
+      "Category": "Private",
+      "FileName": "AdvancedPerformance.ps1",
+      "TimeMs": 8.88,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\scripts\\utilities\\..\\..\\modules\\ProfileCore\\private\\AdvancedPerformance.ps1"
+    },
+    {
+      "Category": "Private",
+      "FileName": "ConfigValidator.ps1",
+      "TimeMs": 8.79,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\scripts\\utilities\\..\\..\\modules\\ProfileCore\\private\\ConfigValidator.ps1"
+    },
+    {
+      "Category": "Public",
+      "FileName": "PerformanceAnalytics.ps1",
+      "TimeMs": 8.7,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\modules\\ProfileCore\\public\\PerformanceAnalytics.ps1"
+    },
+    {
+      "Category": "Public",
+      "FileName": "ConfigCache.ps1",
+      "TimeMs": 8.62,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\modules\\ProfileCore\\public\\ConfigCache.ps1"
+    },
+    {
+      "Category": "Private",
+      "FileName": "ConfigLoader.ps1",
+      "TimeMs": 8.59,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\scripts\\utilities\\..\\..\\modules\\ProfileCore\\private\\ConfigLoader.ps1"
+    },
+    {
+      "Category": "Public",
+      "FileName": "PasswordTools.ps1",
+      "TimeMs": 8.55,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\modules\\ProfileCore\\public\\PasswordTools.ps1"
+    },
+    {
+      "Category": "Public",
+      "FileName": "NetworkUtilities.ps1",
+      "TimeMs": 8.45,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\modules\\ProfileCore\\public\\NetworkUtilities.ps1"
+    },
+    {
+      "Category": "Public",
+      "FileName": "ConfigValidation.ps1",
+      "TimeMs": 8.38,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\modules\\ProfileCore\\public\\ConfigValidation.ps1"
+    },
+    {
+      "Category": "Public",
+      "FileName": "PackageManager.ps1",
+      "TimeMs": 8.26,
+      "Path": "C:\\Users\\a1667\\JetbrainsProject\\03-Development-Projects\\ProfileCore\\modules\\ProfileCore\\public\\PackageManager.ps1"
+    }
+  ],
+  "PrivateFilesMs": 283.68
+}

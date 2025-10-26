@@ -1,0 +1,40 @@
+# ProfileCore .gitattributes
+# Ensures consistent line endings across platforms
+
+# Auto detect text files and normalize line endings
+* text=auto
+
+# PowerShell scripts
+*.ps1    text eol=lf
+*.psm1   text eol=lf
+*.psd1   text eol=lf
+
+# Shell scripts
+*.sh     text eol=lf
+*.bash   text eol=lf
+*.zsh    text eol=lf
+*.fish   text eol=lf
+
+# Documentation
+*.md     text eol=lf
+*.txt    text eol=lf
+
+# Configuration files
+*.json   text eol=lf
+*.yml    text eol=lf
+*.yaml   text eol=lf
+*.toml   text eol=lf
+*.xml    text eol=lf
+
+# Binary files
+*.dll    binary
+*.exe    binary
+*.zip    binary
+*.tar.gz binary
+*.7z     binary
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.ico    binary
+

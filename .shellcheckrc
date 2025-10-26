@@ -1,0 +1,26 @@
+# ProfileCore ShellCheck Configuration
+# Static analysis configuration for shell scripts
+
+# Disable SC1090: Can't follow non-constant source
+# Reason: We dynamically source files based on runtime paths
+disable=SC1090
+
+# Disable SC1091: Not following sourced files
+# Reason: Some files are sourced from user-specific locations
+disable=SC1091
+
+# Disable SC2034: Variable appears unused
+# Reason: Many variables are exported for use by other scripts
+disable=SC2034
+
+# Disable SC2148: Tips depend on target shell
+# Reason: We have shell-specific files with proper shebangs
+disable=SC2148
+
+# Enable all optional checks
+enable=all
+
+# Set shell dialect
+# This can be overridden per-file with shellcheck directives
+shell=bash
+
