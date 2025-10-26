@@ -24,13 +24,13 @@ _profilecore_completions() {{
     cur="${{COMP_WORDS[COMP_CWORD]}}"
     prev="${{COMP_WORDS[COMP_CWORD-1]}}"
     
-    # Top-level commands
-    commands="init completions system network git docker security package file env text process archive uninstall-legacy"
+    # Top-level commands (all 17 command groups)
+    commands="init completions system network git docker security package file env text process archive string http data shell utils uninstall-legacy"
     
-    # Subcommands (updated with all 58 commands)
-    system_cmds="info uptime processes disk-usage memory cpu"
+    # Subcommands (all 97 commands - 100% complete!)
+    system_cmds="info uptime processes disk-usage memory cpu load network-stats temperature users service-list service-status"
     network_cmds="public-ip test-port local-ips dns reverse-dns whois trace ping"
-    git_cmds="status log diff branch remote switch-account add-account list-accounts whoami"
+    git_cmds="status log diff branch remote switch-account add-account list-accounts whoami clone pull push stash commit tag rebase"
     docker_cmds="ps stats logs"
     security_cmds="ssl-check gen-password check-password hash-password"
     package_cmds="install list search update upgrade remove info"
@@ -39,6 +39,11 @@ _profilecore_completions() {{
     text_cmds="grep head tail"
     process_cmds="list kill info tree"
     archive_cmds="compress extract list"
+    string_cmds="base64 url-encode hash"
+    http_cmds="get post download head"
+    data_cmds="json yaml-to-json json-to-yaml"
+    shell_cmds="history which exec path alias"
+    utils_cmds="calc random random-string sleep time timezone version config-get config-set config-list"
     
     case "${{COMP_CWORD}}" in
         1)
@@ -82,6 +87,21 @@ _profilecore_completions() {{
                 archive)
                     COMPREPLY=($(compgen -W "${{archive_cmds}}" -- "${{cur}}"))
                     ;;
+                string)
+                    COMPREPLY=($(compgen -W "${{string_cmds}}" -- "${{cur}}"))
+                    ;;
+                http)
+                    COMPREPLY=($(compgen -W "${{http_cmds}}" -- "${{cur}}"))
+                    ;;
+                data)
+                    COMPREPLY=($(compgen -W "${{data_cmds}}" -- "${{cur}}"))
+                    ;;
+                shell)
+                    COMPREPLY=($(compgen -W "${{shell_cmds}}" -- "${{cur}}"))
+                    ;;
+                utils)
+                    COMPREPLY=($(compgen -W "${{utils_cmds}}" -- "${{cur}}"))
+                    ;;
             esac
             ;;
     esac
@@ -111,6 +131,11 @@ _profilecore() {{
         'text:Text processing'
         'process:Process management'
         'archive:Archive operations'
+        'string:String utilities'
+        'http:HTTP utilities'
+        'data:Data processing'
+        'shell:Shell utilities'
+        'utils:Utility commands'
         'uninstall-legacy:Uninstall v6.0.0 modules'
     )
     
@@ -122,6 +147,12 @@ _profilecore() {{
         'disk-usage:Show disk usage'
         'memory:Show memory information'
         'cpu:Show CPU information'
+        'load:Show system load average'
+        'network-stats:Show network statistics'
+        'temperature:Show temperature sensors'
+        'users:List system users'
+        'service-list:List system services'
+        'service-status:Show service status'
     )
     
     local -a network_cmds
@@ -147,6 +178,13 @@ _profilecore() {{
         'add-account:Add new git account'
         'list-accounts:List git accounts'
         'whoami:Show current git identity'
+        'clone:Clone a repository'
+        'pull:Pull from remote'
+        'push:Push to remote'
+        'stash:Stash changes'
+        'commit:Create a commit'
+        'tag:Create or list tags'
+        'rebase:Rebase current branch'
     )
     
     local -a docker_cmds
@@ -213,6 +251,51 @@ _profilecore() {{
         'list:List archive contents'
     )
     
+    local -a string_cmds
+    string_cmds=(
+        'base64:Base64 encode/decode'
+        'url-encode:URL encode/decode'
+        'hash:Hash string (MD5/SHA256)'
+    )
+    
+    local -a http_cmds
+    http_cmds=(
+        'get:HTTP GET request'
+        'post:HTTP POST request'
+        'download:Download file'
+        'head:HTTP HEAD request'
+    )
+    
+    local -a data_cmds
+    data_cmds=(
+        'json:Format or minify JSON'
+        'yaml-to-json:Convert YAML to JSON'
+        'json-to-yaml:Convert JSON to YAML'
+    )
+    
+    local -a shell_cmds
+    shell_cmds=(
+        'history:Show shell history'
+        'which:Find command in PATH'
+        'exec:Execute command'
+        'path:Show PATH variable'
+        'alias:List aliases'
+    )
+    
+    local -a utils_cmds
+    utils_cmds=(
+        'calc:Calculator'
+        'random:Random number generator'
+        'random-string:Random string generator'
+        'sleep:Sleep/delay'
+        'time:Show current time'
+        'timezone:Show time zones'
+        'version:Show version information'
+        'config-get:Get configuration value'
+        'config-set:Set configuration value'
+        'config-list:List configuration'
+    )
+    
     if (( CURRENT == 2 )); then
         _describe 'command' commands
     elif (( CURRENT == 3 )); then
@@ -253,6 +336,21 @@ _profilecore() {{
             archive)
                 _describe 'archive command' archive_cmds
                 ;;
+            string)
+                _describe 'string command' string_cmds
+                ;;
+            http)
+                _describe 'http command' http_cmds
+                ;;
+            data)
+                _describe 'data command' data_cmds
+                ;;
+            shell)
+                _describe 'shell command' shell_cmds
+                ;;
+            utils)
+                _describe 'utils command' utils_cmds
+                ;;
         esac
     fi
 }}
@@ -279,18 +377,29 @@ complete -c profilecore -f -n "__fish_use_subcommand" -a "env" -d "Environment v
 complete -c profilecore -f -n "__fish_use_subcommand" -a "text" -d "Text processing"
 complete -c profilecore -f -n "__fish_use_subcommand" -a "process" -d "Process management"
 complete -c profilecore -f -n "__fish_use_subcommand" -a "archive" -d "Archive operations"
+complete -c profilecore -f -n "__fish_use_subcommand" -a "string" -d "String utilities"
+complete -c profilecore -f -n "__fish_use_subcommand" -a "http" -d "HTTP utilities"
+complete -c profilecore -f -n "__fish_use_subcommand" -a "data" -d "Data processing"
+complete -c profilecore -f -n "__fish_use_subcommand" -a "shell" -d "Shell utilities"
+complete -c profilecore -f -n "__fish_use_subcommand" -a "utils" -d "Utility commands"
 complete -c profilecore -f -n "__fish_use_subcommand" -a "uninstall-legacy" -d "Uninstall v6.0.0 modules"
 
 # Init/Completions shells
 complete -c profilecore -f -n "__fish_seen_subcommand_from init completions" -a "bash zsh fish powershell"
 
-# System subcommands (all 6 commands)
+# System subcommands (all 12 commands)
 complete -c profilecore -f -n "__fish_seen_subcommand_from system" -a "info" -d "Display system information"
 complete -c profilecore -f -n "__fish_seen_subcommand_from system" -a "uptime" -d "Show system uptime"
 complete -c profilecore -f -n "__fish_seen_subcommand_from system" -a "processes" -d "Show top processes"
 complete -c profilecore -f -n "__fish_seen_subcommand_from system" -a "disk-usage" -d "Show disk usage"
 complete -c profilecore -f -n "__fish_seen_subcommand_from system" -a "memory" -d "Show memory information"
 complete -c profilecore -f -n "__fish_seen_subcommand_from system" -a "cpu" -d "Show CPU information"
+complete -c profilecore -f -n "__fish_seen_subcommand_from system" -a "load" -d "Show system load average"
+complete -c profilecore -f -n "__fish_seen_subcommand_from system" -a "network-stats" -d "Show network statistics"
+complete -c profilecore -f -n "__fish_seen_subcommand_from system" -a "temperature" -d "Show temperature sensors"
+complete -c profilecore -f -n "__fish_seen_subcommand_from system" -a "users" -d "List system users"
+complete -c profilecore -f -n "__fish_seen_subcommand_from system" -a "service-list" -d "List system services"
+complete -c profilecore -f -n "__fish_seen_subcommand_from system" -a "service-status" -d "Show service status"
 
 # Network subcommands (all 8 commands)
 complete -c profilecore -f -n "__fish_seen_subcommand_from network" -a "public-ip" -d "Get public IP address"
@@ -302,7 +411,7 @@ complete -c profilecore -f -n "__fish_seen_subcommand_from network" -a "whois" -
 complete -c profilecore -f -n "__fish_seen_subcommand_from network" -a "trace" -d "Traceroute"
 complete -c profilecore -f -n "__fish_seen_subcommand_from network" -a "ping" -d "Ping host"
 
-# Git subcommands (all 9 commands)
+# Git subcommands (all 16 commands)
 complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "status" -d "Show git status"
 complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "log" -d "Show git log"
 complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "diff" -d "Show working tree changes"
@@ -312,6 +421,13 @@ complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "switch-accou
 complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "add-account" -d "Add git account"
 complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "list-accounts" -d "List accounts"
 complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "whoami" -d "Show git identity"
+complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "clone" -d "Clone repository"
+complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "pull" -d "Pull from remote"
+complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "push" -d "Push to remote"
+complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "stash" -d "Stash changes"
+complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "commit" -d "Create commit"
+complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "tag" -d "Create or list tags"
+complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "rebase" -d "Rebase branch"
 
 # Docker subcommands (all 3 commands)
 complete -c profilecore -f -n "__fish_seen_subcommand_from docker" -a "ps" -d "List containers"
@@ -360,6 +476,41 @@ complete -c profilecore -f -n "__fish_seen_subcommand_from process" -a "tree" -d
 complete -c profilecore -f -n "__fish_seen_subcommand_from archive" -a "compress" -d "Compress files/directories"
 complete -c profilecore -f -n "__fish_seen_subcommand_from archive" -a "extract" -d "Extract archive"
 complete -c profilecore -f -n "__fish_seen_subcommand_from archive" -a "list" -d "List archive contents"
+
+# String utility subcommands (all 3 commands)
+complete -c profilecore -f -n "__fish_seen_subcommand_from string" -a "base64" -d "Base64 encode/decode"
+complete -c profilecore -f -n "__fish_seen_subcommand_from string" -a "url-encode" -d "URL encode/decode"
+complete -c profilecore -f -n "__fish_seen_subcommand_from string" -a "hash" -d "Hash string"
+
+# HTTP utility subcommands (all 4 commands)
+complete -c profilecore -f -n "__fish_seen_subcommand_from http" -a "get" -d "HTTP GET request"
+complete -c profilecore -f -n "__fish_seen_subcommand_from http" -a "post" -d "HTTP POST request"
+complete -c profilecore -f -n "__fish_seen_subcommand_from http" -a "download" -d "Download file"
+complete -c profilecore -f -n "__fish_seen_subcommand_from http" -a "head" -d "HTTP HEAD request"
+
+# Data processing subcommands (all 3 commands)
+complete -c profilecore -f -n "__fish_seen_subcommand_from data" -a "json" -d "Format or minify JSON"
+complete -c profilecore -f -n "__fish_seen_subcommand_from data" -a "yaml-to-json" -d "Convert YAML to JSON"
+complete -c profilecore -f -n "__fish_seen_subcommand_from data" -a "json-to-yaml" -d "Convert JSON to YAML"
+
+# Shell utility subcommands (all 5 commands)
+complete -c profilecore -f -n "__fish_seen_subcommand_from shell" -a "history" -d "Show shell history"
+complete -c profilecore -f -n "__fish_seen_subcommand_from shell" -a "which" -d "Find command in PATH"
+complete -c profilecore -f -n "__fish_seen_subcommand_from shell" -a "exec" -d "Execute command"
+complete -c profilecore -f -n "__fish_seen_subcommand_from shell" -a "path" -d "Show PATH variable"
+complete -c profilecore -f -n "__fish_seen_subcommand_from shell" -a "alias" -d "List aliases"
+
+# Utility command subcommands (all 10 commands)
+complete -c profilecore -f -n "__fish_seen_subcommand_from utils" -a "calc" -d "Calculator"
+complete -c profilecore -f -n "__fish_seen_subcommand_from utils" -a "random" -d "Random number generator"
+complete -c profilecore -f -n "__fish_seen_subcommand_from utils" -a "random-string" -d "Random string generator"
+complete -c profilecore -f -n "__fish_seen_subcommand_from utils" -a "sleep" -d "Sleep/delay"
+complete -c profilecore -f -n "__fish_seen_subcommand_from utils" -a "time" -d "Show current time"
+complete -c profilecore -f -n "__fish_seen_subcommand_from utils" -a "timezone" -d "Show time zones"
+complete -c profilecore -f -n "__fish_seen_subcommand_from utils" -a "version" -d "Show version information"
+complete -c profilecore -f -n "__fish_seen_subcommand_from utils" -a "config-get" -d "Get configuration value"
+complete -c profilecore -f -n "__fish_seen_subcommand_from utils" -a "config-set" -d "Set configuration value"
+complete -c profilecore -f -n "__fish_seen_subcommand_from utils" -a "config-list" -d "List configuration"
 "#);
 }
 
@@ -384,13 +535,18 @@ Register-ArgumentCompleter -CommandName profilecore -ScriptBlock {{
         @{{ Name = 'text'; Description = 'Text processing' }}
         @{{ Name = 'process'; Description = 'Process management' }}
         @{{ Name = 'archive'; Description = 'Archive operations' }}
+        @{{ Name = 'string'; Description = 'String utilities' }}
+        @{{ Name = 'http'; Description = 'HTTP utilities' }}
+        @{{ Name = 'data'; Description = 'Data processing' }}
+        @{{ Name = 'shell'; Description = 'Shell utilities' }}
+        @{{ Name = 'utils'; Description = 'Utility commands' }}
         @{{ Name = 'uninstall-legacy'; Description = 'Uninstall legacy modules' }}
     )
     
-    # All 58 commands
-    $systemCmds = @('info', 'uptime', 'processes', 'disk-usage', 'memory', 'cpu')
+    # All 97 commands
+    $systemCmds = @('info', 'uptime', 'processes', 'disk-usage', 'memory', 'cpu', 'load', 'network-stats', 'temperature', 'users', 'service-list', 'service-status')
     $networkCmds = @('public-ip', 'test-port', 'local-ips', 'dns', 'reverse-dns', 'whois', 'trace', 'ping')
-    $gitCmds = @('status', 'log', 'diff', 'branch', 'remote', 'switch-account', 'add-account', 'list-accounts', 'whoami')
+    $gitCmds = @('status', 'log', 'diff', 'branch', 'remote', 'switch-account', 'add-account', 'list-accounts', 'whoami', 'clone', 'pull', 'push', 'stash', 'commit', 'tag', 'rebase')
     $dockerCmds = @('ps', 'stats', 'logs')
     $securityCmds = @('ssl-check', 'gen-password', 'check-password', 'hash-password')
     $packageCmds = @('install', 'list', 'search', 'update', 'upgrade', 'remove', 'info')
@@ -399,6 +555,11 @@ Register-ArgumentCompleter -CommandName profilecore -ScriptBlock {{
     $textCmds = @('grep', 'head', 'tail')
     $processCmds = @('list', 'kill', 'info', 'tree')
     $archiveCmds = @('compress', 'extract', 'list')
+    $stringCmds = @('base64', 'url-encode', 'hash')
+    $httpCmds = @('get', 'post', 'download', 'head')
+    $dataCmds = @('json', 'yaml-to-json', 'json-to-yaml')
+    $shellCmds = @('history', 'which', 'exec', 'path', 'alias')
+    $utilsCmds = @('calc', 'random', 'random-string', 'sleep', 'time', 'timezone', 'version', 'config-get', 'config-set', 'config-list')
     
     $tokens = $commandAst.ToString().Split(' ')
     
@@ -420,6 +581,11 @@ Register-ArgumentCompleter -CommandName profilecore -ScriptBlock {{
             'text' {{ $textCmds }}
             'process' {{ $processCmds }}
             'archive' {{ $archiveCmds }}
+            'string' {{ $stringCmds }}
+            'http' {{ $httpCmds }}
+            'data' {{ $dataCmds }}
+            'shell' {{ $shellCmds }}
+            'utils' {{ $utilsCmds }}
             default {{ @() }}
         }}
         
