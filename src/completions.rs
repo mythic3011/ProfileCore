@@ -25,15 +25,16 @@ _profilecore_completions() {{
     prev="${{COMP_WORDS[COMP_CWORD-1]}}"
     
     # Top-level commands
-    commands="init completions system network git docker security package uninstall-legacy"
+    commands="init completions system network git docker security package file uninstall-legacy"
     
-    # Subcommands (updated with all 25 commands)
-    system_cmds="info"
+    # Subcommands (updated with all 39 commands)
+    system_cmds="info uptime processes disk-usage memory cpu"
     network_cmds="public-ip test-port local-ips dns reverse-dns whois trace ping"
-    git_cmds="status switch-account add-account list-accounts whoami"
+    git_cmds="status log switch-account add-account list-accounts whoami"
     docker_cmds="ps stats logs"
     security_cmds="ssl-check gen-password check-password hash-password"
-    package_cmds="install"
+    package_cmds="install list search update upgrade remove info"
+    file_cmds="hash size"
     
     case "${{COMP_CWORD}}" in
         1)
@@ -62,6 +63,9 @@ _profilecore_completions() {{
                 package)
                     COMPREPLY=($(compgen -W "${{package_cmds}}" -- "${{cur}}"))
                     ;;
+                file)
+                    COMPREPLY=($(compgen -W "${{file_cmds}}" -- "${{cur}}"))
+                    ;;
             esac
             ;;
     esac
@@ -86,11 +90,19 @@ _profilecore() {{
         'docker:Docker operations'
         'security:Security tools'
         'package:Package management'
+        'file:File operations'
         'uninstall-legacy:Uninstall v6.0.0 modules'
     )
     
     local -a system_cmds
-    system_cmds=('info:Display system information')
+    system_cmds=(
+        'info:Display system information'
+        'uptime:Show system uptime'
+        'processes:Show top processes'
+        'disk-usage:Show disk usage'
+        'memory:Show memory information'
+        'cpu:Show CPU information'
+    )
     
     local -a network_cmds
     network_cmds=(
@@ -107,6 +119,7 @@ _profilecore() {{
     local -a git_cmds
     git_cmds=(
         'status:Show git status'
+        'log:Show git log'
         'switch-account:Switch git account'
         'add-account:Add new git account'
         'list-accounts:List git accounts'
@@ -126,6 +139,23 @@ _profilecore() {{
         'gen-password:Generate password'
         'check-password:Check password strength'
         'hash-password:Hash password'
+    )
+    
+    local -a package_cmds
+    package_cmds=(
+        'install:Install package'
+        'list:List installed packages'
+        'search:Search for packages'
+        'update:Update package lists'
+        'upgrade:Upgrade package'
+        'remove:Remove package'
+        'info:Show package information'
+    )
+    
+    local -a file_cmds
+    file_cmds=(
+        'hash:Calculate file hash'
+        'size:Get file/directory size'
     )
     
     if (( CURRENT == 2 )); then
@@ -150,6 +180,12 @@ _profilecore() {{
             security)
                 _describe 'security command' security_cmds
                 ;;
+            package)
+                _describe 'package command' package_cmds
+                ;;
+            file)
+                _describe 'file command' file_cmds
+                ;;
         esac
     fi
 }}
@@ -171,13 +207,19 @@ complete -c profilecore -f -n "__fish_use_subcommand" -a "git" -d "Git operation
 complete -c profilecore -f -n "__fish_use_subcommand" -a "docker" -d "Docker operations"
 complete -c profilecore -f -n "__fish_use_subcommand" -a "security" -d "Security tools"
 complete -c profilecore -f -n "__fish_use_subcommand" -a "package" -d "Package management"
+complete -c profilecore -f -n "__fish_use_subcommand" -a "file" -d "File operations"
 complete -c profilecore -f -n "__fish_use_subcommand" -a "uninstall-legacy" -d "Uninstall v6.0.0 modules"
 
 # Init/Completions shells
 complete -c profilecore -f -n "__fish_seen_subcommand_from init completions" -a "bash zsh fish powershell"
 
-# System subcommands
+# System subcommands (all 6 commands)
 complete -c profilecore -f -n "__fish_seen_subcommand_from system" -a "info" -d "Display system information"
+complete -c profilecore -f -n "__fish_seen_subcommand_from system" -a "uptime" -d "Show system uptime"
+complete -c profilecore -f -n "__fish_seen_subcommand_from system" -a "processes" -d "Show top processes"
+complete -c profilecore -f -n "__fish_seen_subcommand_from system" -a "disk-usage" -d "Show disk usage"
+complete -c profilecore -f -n "__fish_seen_subcommand_from system" -a "memory" -d "Show memory information"
+complete -c profilecore -f -n "__fish_seen_subcommand_from system" -a "cpu" -d "Show CPU information"
 
 # Network subcommands (all 8 commands)
 complete -c profilecore -f -n "__fish_seen_subcommand_from network" -a "public-ip" -d "Get public IP address"
@@ -189,8 +231,9 @@ complete -c profilecore -f -n "__fish_seen_subcommand_from network" -a "whois" -
 complete -c profilecore -f -n "__fish_seen_subcommand_from network" -a "trace" -d "Traceroute"
 complete -c profilecore -f -n "__fish_seen_subcommand_from network" -a "ping" -d "Ping host"
 
-# Git subcommands (all 5 commands)
+# Git subcommands (all 6 commands)
 complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "status" -d "Show git status"
+complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "log" -d "Show git log"
 complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "switch-account" -d "Switch git account"
 complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "add-account" -d "Add git account"
 complete -c profilecore -f -n "__fish_seen_subcommand_from git" -a "list-accounts" -d "List accounts"
@@ -207,8 +250,18 @@ complete -c profilecore -f -n "__fish_seen_subcommand_from security" -a "gen-pas
 complete -c profilecore -f -n "__fish_seen_subcommand_from security" -a "check-password" -d "Check password strength"
 complete -c profilecore -f -n "__fish_seen_subcommand_from security" -a "hash-password" -d "Hash password"
 
-# Package subcommands
+# Package subcommands (all 7 commands)
 complete -c profilecore -f -n "__fish_seen_subcommand_from package" -a "install" -d "Install package"
+complete -c profilecore -f -n "__fish_seen_subcommand_from package" -a "list" -d "List installed packages"
+complete -c profilecore -f -n "__fish_seen_subcommand_from package" -a "search" -d "Search for packages"
+complete -c profilecore -f -n "__fish_seen_subcommand_from package" -a "update" -d "Update package lists"
+complete -c profilecore -f -n "__fish_seen_subcommand_from package" -a "upgrade" -d "Upgrade package"
+complete -c profilecore -f -n "__fish_seen_subcommand_from package" -a "remove" -d "Remove package"
+complete -c profilecore -f -n "__fish_seen_subcommand_from package" -a "info" -d "Show package information"
+
+# File subcommands (all 2 commands)
+complete -c profilecore -f -n "__fish_seen_subcommand_from file" -a "hash" -d "Calculate file hash"
+complete -c profilecore -f -n "__fish_seen_subcommand_from file" -a "size" -d "Get file/directory size"
 "#);
 }
 
@@ -228,16 +281,18 @@ Register-ArgumentCompleter -CommandName profilecore -ScriptBlock {{
         @{{ Name = 'docker'; Description = 'Docker operations' }}
         @{{ Name = 'security'; Description = 'Security tools' }}
         @{{ Name = 'package'; Description = 'Package management' }}
+        @{{ Name = 'file'; Description = 'File operations' }}
         @{{ Name = 'uninstall-legacy'; Description = 'Uninstall legacy modules' }}
     )
     
-    # All 25 commands
-    $systemCmds = @('info')
+    # All 39 commands
+    $systemCmds = @('info', 'uptime', 'processes', 'disk-usage', 'memory', 'cpu')
     $networkCmds = @('public-ip', 'test-port', 'local-ips', 'dns', 'reverse-dns', 'whois', 'trace', 'ping')
-    $gitCmds = @('status', 'switch-account', 'add-account', 'list-accounts', 'whoami')
+    $gitCmds = @('status', 'log', 'switch-account', 'add-account', 'list-accounts', 'whoami')
     $dockerCmds = @('ps', 'stats', 'logs')
     $securityCmds = @('ssl-check', 'gen-password', 'check-password', 'hash-password')
-    $packageCmds = @('install')
+    $packageCmds = @('install', 'list', 'search', 'update', 'upgrade', 'remove', 'info')
+    $fileCmds = @('hash', 'size')
     
     $tokens = $commandAst.ToString().Split(' ')
     
@@ -254,6 +309,7 @@ Register-ArgumentCompleter -CommandName profilecore -ScriptBlock {{
             'docker' {{ $dockerCmds }}
             'security' {{ $securityCmds }}
             'package' {{ $packageCmds }}
+            'file' {{ $fileCmds }}
             default {{ @() }}
         }}
         

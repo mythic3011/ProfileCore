@@ -50,6 +50,9 @@ enum Command {
     #[options(help = "package management")]
     Package(PackageOpts),
     
+    #[options(help = "file operations")]
+    File(FileOpts),
+    
     #[options(help = "uninstall legacy v6.0.0 PowerShell modules")]
     UninstallLegacy(UninstallOpts),
 }
@@ -269,6 +272,9 @@ enum GitCmd {
     #[options(help = "show git status")]
     Status(GitStatusOpts),
     
+    #[options(help = "show git log")]
+    Log(GitLogOpts),
+    
     #[options(help = "switch git account")]
     SwitchAccount(SwitchAccountOpts),
     
@@ -286,6 +292,15 @@ enum GitCmd {
 struct GitStatusOpts {
     #[options(help = "show help")]
     help: bool,
+}
+
+#[derive(Options)]
+struct GitLogOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(help = "number of commits to show", default = "10", meta = "N")]
+    limit: usize,
 }
 
 #[derive(Options)]
@@ -448,6 +463,24 @@ struct PackageOpts {
 enum PackageCmd {
     #[options(help = "install package")]
     Install(InstallOpts),
+    
+    #[options(help = "list installed packages")]
+    List(ListOpts),
+    
+    #[options(help = "search for packages")]
+    Search(SearchOpts),
+    
+    #[options(help = "update package lists")]
+    Update(UpdateOpts),
+    
+    #[options(help = "upgrade a package")]
+    Upgrade(UpgradeOpts),
+    
+    #[options(help = "remove a package")]
+    Remove(RemoveOpts),
+    
+    #[options(help = "show package information")]
+    Info(PackageInfoOpts),
 }
 
 #[derive(Options)]
@@ -457,6 +490,93 @@ struct InstallOpts {
     
     #[options(free, help = "package name")]
     package: String,
+}
+
+#[derive(Options)]
+struct ListOpts {
+    #[options(help = "show help")]
+    help: bool,
+}
+
+#[derive(Options)]
+struct SearchOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "search query")]
+    query: String,
+}
+
+#[derive(Options)]
+struct UpdateOpts {
+    #[options(help = "show help")]
+    help: bool,
+}
+
+#[derive(Options)]
+struct UpgradeOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "package name")]
+    package: String,
+}
+
+#[derive(Options)]
+struct RemoveOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "package name")]
+    package: String,
+}
+
+#[derive(Options)]
+struct PackageInfoOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "package name")]
+    package: String,
+}
+
+#[derive(Options)]
+struct FileOpts {
+    #[options(help = "show help for file")]
+    help: bool,
+    
+    #[options(command)]
+    command: Option<FileCmd>,
+}
+
+#[derive(Options)]
+enum FileCmd {
+    #[options(help = "calculate file hash")]
+    Hash(HashOpts),
+    
+    #[options(help = "get file/directory size")]
+    Size(SizeOpts),
+}
+
+#[derive(Options)]
+struct HashOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "file path")]
+    file: String,
+    
+    #[options(help = "hash algorithm: md5, sha256, all", default = "sha256", meta = "ALG")]
+    algorithm: String,
+}
+
+#[derive(Options)]
+struct SizeOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "file or directory path")]
+    path: String,
 }
 
 #[derive(Options)]
@@ -573,13 +693,16 @@ fn main() {
         Command::Git(opts) => {
             if opts.help {
                 println!("Usage: profilecore git <command>");
-                println!("Commands: status, switch-account, add-account, list-accounts, whoami");
+                println!("Commands: status, log, switch-account, add-account, list-accounts, whoami");
                 return;
             }
             
             match opts.command {
                 Some(GitCmd::Status(_)) => {
                     commands::git::status();
+                }
+                Some(GitCmd::Log(log_opts)) => {
+                    commands::git::log(log_opts.limit);
                 }
                 Some(GitCmd::SwitchAccount(switch_opts)) => {
                     commands::git::switch_account(&switch_opts.account);
@@ -654,7 +777,7 @@ fn main() {
         Command::Package(opts) => {
             if opts.help {
                 println!("Usage: profilecore package <command>");
-                println!("Commands: install");
+                println!("Commands: install, list, search, update, upgrade, remove, info");
                 return;
             }
             
@@ -662,8 +785,47 @@ fn main() {
                 Some(PackageCmd::Install(install_opts)) => {
                     commands::package::install(&install_opts.package);
                 }
+                Some(PackageCmd::List(_)) => {
+                    commands::package::list();
+                }
+                Some(PackageCmd::Search(search_opts)) => {
+                    commands::package::search(&search_opts.query);
+                }
+                Some(PackageCmd::Update(_)) => {
+                    commands::package::update();
+                }
+                Some(PackageCmd::Upgrade(upgrade_opts)) => {
+                    commands::package::upgrade(&upgrade_opts.package);
+                }
+                Some(PackageCmd::Remove(remove_opts)) => {
+                    commands::package::remove(&remove_opts.package);
+                }
+                Some(PackageCmd::Info(info_opts)) => {
+                    commands::package::info(&info_opts.package);
+                }
                 None => {
                     eprintln!("Error: No package command specified");
+                    process::exit(1);
+                }
+            }
+        }
+        
+        Command::File(opts) => {
+            if opts.help {
+                println!("Usage: profilecore file <command>");
+                println!("Commands: hash, size");
+                return;
+            }
+            
+            match opts.command {
+                Some(FileCmd::Hash(hash_opts)) => {
+                    commands::file::hash(&hash_opts.file, &hash_opts.algorithm);
+                }
+                Some(FileCmd::Size(size_opts)) => {
+                    commands::file::size(&size_opts.path);
+                }
+                None => {
+                    eprintln!("Error: No file command specified");
                     process::exit(1);
                 }
             }

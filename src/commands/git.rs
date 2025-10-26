@@ -258,3 +258,84 @@ pub fn whoami() {
     println!();
 }
 
+pub fn log(limit: usize) {
+    let current_dir = match env::current_dir() {
+        Ok(dir) => dir,
+        Err(e) => {
+            eprintln!("{} Failed to get current directory: {}", "✗".red(), e);
+            return;
+        }
+    };
+    
+    let repo = match Repository::discover(&current_dir) {
+        Ok(r) => r,
+        Err(e) => {
+            eprintln!("{} Not a git repository: {}", "✗".red(), e);
+            return;
+        }
+    };
+    
+    // Get HEAD
+    let mut revwalk = match repo.revwalk() {
+        Ok(r) => r,
+        Err(e) => {
+            eprintln!("{} Failed to create revwalk: {}", "✗".red(), e);
+            return;
+        }
+    };
+    
+    if let Err(e) = revwalk.push_head() {
+        eprintln!("{} Failed to push HEAD: {}", "✗".red(), e);
+        return;
+    }
+    
+    println!("\n{}", "Git Log".cyan().bold());
+    println!("{}", "=".repeat(80));
+    
+    let mut count = 0;
+    for (index, oid) in revwalk.enumerate() {
+        if index >= limit {
+            break;
+        }
+        
+        let oid = match oid {
+            Ok(o) => o,
+            Err(e) => {
+                eprintln!("{} Failed to get OID: {}", "✗".red(), e);
+                continue;
+            }
+        };
+        
+        let commit = match repo.find_commit(oid) {
+            Ok(c) => c,
+            Err(e) => {
+                eprintln!("{} Failed to find commit: {}", "✗".red(), e);
+                continue;
+            }
+        };
+        
+        let short_id = &oid.to_string()[..7];
+        let message = commit.message().unwrap_or("(no message)").lines().next().unwrap_or("");
+        let author = commit.author();
+        let time = commit.time();
+        
+        // Convert timestamp to readable format
+        let datetime = chrono::DateTime::from_timestamp(time.seconds(), 0)
+            .unwrap_or_else(|| chrono::DateTime::from_timestamp(0, 0).unwrap());
+        let formatted_time = datetime.format("%Y-%m-%d %H:%M:%S").to_string();
+        
+        println!("\n{} {}", "commit".yellow(), short_id.cyan());
+        println!("Author: {} <{}>", author.name().unwrap_or("?"), author.email().unwrap_or("?"));
+        println!("Date:   {}", formatted_time);
+        println!("\n    {}", message);
+        
+        count += 1;
+    }
+    
+    if count == 0 {
+        println!("{} No commits found", "!".yellow());
+    }
+    
+    println!();
+}
+

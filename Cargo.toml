@@ -59,6 +59,8 @@ chrono = "0.4"                    # Date/time handling
 dirs = "5.0"                      # User directories
 regex = "1.11"                    # Regular expressions
 rand = "0.8"                      # Random generation
+sha2 = "0.10"                     # SHA-256 hashing
+md5 = "0.7"                       # MD5 hashing
 
 [target.'cfg(windows)'.dependencies]
 # Windows-specific (minimal)
