@@ -15,4 +15,6 @@ pub mod text;
 pub mod process;
 pub mod archive;
 pub mod string;
+pub mod http;
+pub mod data;
 

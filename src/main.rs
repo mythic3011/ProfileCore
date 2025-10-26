@@ -68,6 +68,12 @@ enum Command {
     #[options(help = "string utility commands")]
     String(StringOpts),
     
+    #[options(help = "HTTP utility commands")]
+    Http(HttpOpts),
+    
+    #[options(help = "data processing commands")]
+    Data(DataOpts),
+    
     #[options(help = "uninstall legacy v6.0.0 PowerShell modules")]
     UninstallLegacy(UninstallOpts),
 }
@@ -349,6 +355,15 @@ enum GitCmd {
     
     #[options(help = "stash changes")]
     Stash(StashOpts),
+    
+    #[options(help = "create a commit")]
+    Commit(CommitOpts),
+    
+    #[options(help = "create or list tags")]
+    Tag(TagOpts),
+    
+    #[options(help = "rebase current branch")]
+    Rebase(RebaseOpts),
 }
 
 #[derive(Options)]
@@ -457,6 +472,45 @@ struct StashOpts {
     
     #[options(free, help = "stash action: save, pop, list, clear")]
     action: Option<String>,
+}
+
+#[derive(Options)]
+struct CommitOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "commit message")]
+    message: String,
+    
+    #[options(help = "stage all changes", short = "a")]
+    all: bool,
+}
+
+#[derive(Options)]
+struct TagOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "tag name")]
+    name: Option<String>,
+    
+    #[options(help = "annotated tag message", short = "m", meta = "MSG")]
+    message: Option<String>,
+    
+    #[options(help = "list all tags", short = "l")]
+    list: bool,
+}
+
+#[derive(Options)]
+struct RebaseOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "branch to rebase onto")]
+    branch: String,
+    
+    #[options(help = "interactive rebase", short = "i")]
+    interactive: bool,
 }
 
 #[derive(Options)]
@@ -1009,6 +1063,120 @@ struct StringHashOpts {
 }
 
 #[derive(Options)]
+struct HttpOpts {
+    #[options(help = "show help for http")]
+    help: bool,
+    
+    #[options(command)]
+    command: Option<HttpCmd>,
+}
+
+#[derive(Options)]
+enum HttpCmd {
+    #[options(help = "HTTP GET request")]
+    Get(HttpGetOpts),
+    
+    #[options(help = "HTTP POST request")]
+    Post(HttpPostOpts),
+    
+    #[options(help = "download file")]
+    Download(HttpDownloadOpts),
+    
+    #[options(help = "HTTP HEAD request")]
+    Head(HttpHeadOpts),
+}
+
+#[derive(Options)]
+struct HttpGetOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "URL to request")]
+    url: String,
+}
+
+#[derive(Options)]
+struct HttpPostOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "URL and request body")]
+    args: Vec<String>,
+    
+    #[options(help = "content type", default = "application/json", meta = "TYPE")]
+    content_type: String,
+}
+
+#[derive(Options)]
+struct HttpDownloadOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "URL and output file")]
+    args: Vec<String>,
+}
+
+#[derive(Options)]
+struct HttpHeadOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "URL to request")]
+    url: String,
+}
+
+#[derive(Options)]
+struct DataOpts {
+    #[options(help = "show help for data")]
+    help: bool,
+    
+    #[options(command)]
+    command: Option<DataCmd>,
+}
+
+#[derive(Options)]
+enum DataCmd {
+    #[options(help = "format or minify JSON")]
+    Json(DataJsonOpts),
+    
+    #[options(help = "convert YAML to JSON")]
+    YamlToJson(DataYamlToJsonOpts),
+    
+    #[options(help = "convert JSON to YAML")]
+    JsonToYaml(DataJsonToYamlOpts),
+}
+
+#[derive(Options)]
+struct DataJsonOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "JSON input string")]
+    input: String,
+    
+    #[options(help = "minify instead of format", short = "m")]
+    minify: bool,
+}
+
+#[derive(Options)]
+struct DataYamlToJsonOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "YAML input string")]
+    input: String,
+}
+
+#[derive(Options)]
+struct DataJsonToYamlOpts {
+    #[options(help = "show help")]
+    help: bool,
+    
+    #[options(free, help = "JSON input string")]
+    input: String,
+}
+
+#[derive(Options)]
 struct UninstallOpts {
     #[options(help = "show help")]
     help: bool,
@@ -1131,7 +1299,7 @@ fn main() {
         Command::Git(opts) => {
             if opts.help {
                 println!("Usage: profilecore git <command>");
-                println!("Commands: status, log, diff, branch, remote, switch-account, add-account, list-accounts, whoami, clone, pull, push, stash");
+                println!("Commands: status, log, diff, branch, remote, switch-account, add-account, list-accounts, whoami, clone, pull, push, stash, commit, tag, rebase");
                 return;
             }
             
@@ -1188,6 +1356,22 @@ fn main() {
                 Some(GitCmd::Stash(stash_opts)) => {
                     let action = stash_opts.action.as_deref().unwrap_or("save");
                     commands::git::stash(action);
+                }
+                Some(GitCmd::Commit(commit_opts)) => {
+                    commands::git::commit(&commit_opts.message, commit_opts.all);
+                }
+                Some(GitCmd::Tag(tag_opts)) => {
+                    if tag_opts.list {
+                        commands::git::tag("", None, true);
+                    } else if let Some(name) = &tag_opts.name {
+                        commands::git::tag(name, tag_opts.message.as_deref(), false);
+                    } else {
+                        eprintln!("Error: tag name required (or use --list)");
+                        process::exit(1);
+                    }
+                }
+                Some(GitCmd::Rebase(rebase_opts)) => {
+                    commands::git::rebase(&rebase_opts.branch, rebase_opts.interactive);
                 }
                 None => {
                     eprintln!("Error: No git command specified");
@@ -1456,6 +1640,67 @@ fn main() {
             }
         }
         
+        Command::Http(opts) => {
+            if opts.help {
+                println!("Usage: profilecore http <command>");
+                println!("Commands: get, post, download, head");
+                return;
+            }
+            
+            match opts.command {
+                Some(HttpCmd::Get(get_opts)) => {
+                    commands::http::get(&get_opts.url, None);
+                }
+                Some(HttpCmd::Post(post_opts)) => {
+                    if post_opts.args.len() < 2 {
+                        eprintln!("Error: post requires URL and body");
+                        eprintln!("Usage: profilecore http post <url> <body>");
+                        process::exit(1);
+                    }
+                    commands::http::post(&post_opts.args[0], &post_opts.args[1], &post_opts.content_type);
+                }
+                Some(HttpCmd::Download(download_opts)) => {
+                    if download_opts.args.len() < 2 {
+                        eprintln!("Error: download requires URL and output file");
+                        eprintln!("Usage: profilecore http download <url> <output>");
+                        process::exit(1);
+                    }
+                    commands::http::download(&download_opts.args[0], &download_opts.args[1]);
+                }
+                Some(HttpCmd::Head(head_opts)) => {
+                    commands::http::head(&head_opts.url);
+                }
+                None => {
+                    eprintln!("Error: No http command specified");
+                    process::exit(1);
+                }
+            }
+        }
+        
+        Command::Data(opts) => {
+            if opts.help {
+                println!("Usage: profilecore data <command>");
+                println!("Commands: json, yaml-to-json, json-to-yaml");
+                return;
+            }
+            
+            match opts.command {
+                Some(DataCmd::Json(json_opts)) => {
+                    commands::data::json_format(&json_opts.input, json_opts.minify);
+                }
+                Some(DataCmd::YamlToJson(yaml_opts)) => {
+                    commands::data::yaml_to_json(&yaml_opts.input);
+                }
+                Some(DataCmd::JsonToYaml(json_opts)) => {
+                    commands::data::json_to_yaml(&json_opts.input);
+                }
+                None => {
+                    eprintln!("Error: No data command specified");
+                    process::exit(1);
+                }
+            }
+        }
+        
         Command::UninstallLegacy(_) => {
             commands::uninstall::uninstall_legacy();
         }
@@ -1483,6 +1728,8 @@ fn print_help() {
     println!("    process             Process management");
     println!("    archive             Archive operations");
     println!("    string              String utilities");
+    println!("    http                HTTP utilities");
+    println!("    data                Data processing");
     println!("    uninstall-legacy    Remove v6.0.0 PowerShell modules");
     println!();
     println!("EXAMPLES:");

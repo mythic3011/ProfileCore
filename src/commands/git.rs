@@ -739,3 +739,163 @@ pub fn stash(action: &str) {
     println!();
 }
 
+pub fn commit(message: &str, all: bool) {
+    let current_dir = match env::current_dir() {
+        Ok(dir) => dir,
+        Err(e) => {
+            eprintln!("{} Failed to get current directory: {}", "✗".red(), e);
+            return;
+        }
+    };
+    
+    let repo = match git2::Repository::open(&current_dir) {
+        Ok(r) => r,
+        Err(e) => {
+            eprintln!("{} Not a git repository: {}", "✗".red(), e);
+            return;
+        }
+    };
+    
+    println!("\n{}", "Creating commit...".cyan().bold());
+    println!("{}", "=".repeat(60));
+    
+    // If --all flag, stage all changes first
+    if all {
+        println!("Staging all changes...");
+        match std::process::Command::new("git")
+            .args(&["add", "-A"])
+            .status()
+        {
+            Ok(status) => {
+                if !status.success() {
+                    eprintln!("{} Failed to stage changes", "✗".red());
+                    return;
+                }
+            }
+            Err(e) => {
+                eprintln!("{} Failed to execute git add: {}", "✗".red(), e);
+                return;
+            }
+        }
+    }
+    
+    // Use command line git for commit (simpler for handling index)
+    match std::process::Command::new("git")
+        .args(&["commit", "-m", message])
+        .status()
+    {
+        Ok(status) => {
+            if status.success() {
+                println!("{} Commit created successfully", "✓".green());
+                println!("Message: {}", message.yellow());
+            } else {
+                eprintln!("{} Commit failed (nothing to commit?)", "✗".red());
+            }
+        }
+        Err(e) => {
+            eprintln!("{} Failed to execute git commit: {}", "✗".red(), e);
+        }
+    }
+    
+    println!();
+}
+
+pub fn tag(name: &str, message: Option<&str>, list: bool) {
+    if list {
+        println!("\n{}", "Git Tags".cyan().bold());
+        println!("{}", "=".repeat(60));
+        
+        match std::process::Command::new("git")
+            .args(&["tag", "-l"])
+            .output()
+        {
+            Ok(output) => {
+                if output.status.success() {
+                    let tags = String::from_utf8_lossy(&output.stdout);
+                    if tags.trim().is_empty() {
+                        println!("{} No tags found", "!".yellow());
+                    } else {
+                        println!("{}", tags);
+                    }
+                } else {
+                    eprintln!("{} Failed to list tags", "✗".red());
+                }
+            }
+            Err(e) => {
+                eprintln!("{} Failed to execute git tag: {}", "✗".red(), e);
+            }
+        }
+        println!();
+        return;
+    }
+    
+    println!("\n{} {}", "Creating tag:".cyan().bold(), name.yellow());
+    println!("{}", "=".repeat(60));
+    
+    let mut args = vec!["tag"];
+    
+    if let Some(msg) = message {
+        args.push("-a");
+        args.push(name);
+        args.push("-m");
+        args.push(msg);
+    } else {
+        args.push(name);
+    }
+    
+    match std::process::Command::new("git")
+        .args(&args)
+        .status()
+    {
+        Ok(status) => {
+            if status.success() {
+                println!("{} Tag created successfully", "✓".green());
+                if message.is_some() {
+                    println!("Type: Annotated tag");
+                } else {
+                    println!("Type: Lightweight tag");
+                }
+            } else {
+                eprintln!("{} Tag creation failed (tag already exists?)", "✗".red());
+            }
+        }
+        Err(e) => {
+            eprintln!("{} Failed to execute git tag: {}", "✗".red(), e);
+        }
+    }
+    
+    println!();
+}
+
+pub fn rebase(branch: &str, interactive: bool) {
+    println!("\n{} {}", "Rebasing onto:".cyan().bold(), branch.yellow());
+    println!("{}", "=".repeat(60));
+    
+    let mut args = vec!["rebase"];
+    
+    if interactive {
+        args.push("-i");
+    }
+    
+    args.push(branch);
+    
+    match std::process::Command::new("git")
+        .args(&args)
+        .status()
+    {
+        Ok(status) => {
+            if status.success() {
+                println!("{} Rebase completed successfully", "✓".green());
+            } else {
+                eprintln!("{} Rebase failed or has conflicts", "✗".red());
+                eprintln!("Resolve conflicts and run: git rebase --continue");
+            }
+        }
+        Err(e) => {
+            eprintln!("{} Failed to execute git rebase: {}", "✗".red(), e);
+        }
+    }
+    
+    println!();
+}
+
