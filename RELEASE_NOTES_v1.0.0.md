@@ -19,17 +19,20 @@ ProfileCore is a **unified cross-shell interface** that provides 97 powerful com
 ## ✨ Highlights
 
 ### 🚀 Complete Feature Set
+
 - **97 Commands** across 17 categories
 - **4 Shell Support**: bash, zsh, fish, PowerShell
 - **3 Platforms**: Windows, macOS, Linux
 - **Full Tab Completion** for all shells
 
 ### ⚡ Performance
+
 - **<50ms** cold start (vs ~180ms for v6.0.0 PowerShell)
 - **~160ns** argument parsing with gumdrop
 - **9.94 MB** optimized binary (under 10MB target!)
 
 ### 🛠️ Production Quality
+
 - Zero code warnings (clean compilation)
 - Comprehensive error handling
 - Cross-platform compatibility
@@ -40,6 +43,7 @@ ProfileCore is a **unified cross-shell interface** that provides 97 powerful com
 ## 📦 All 97 Commands
 
 ### System Information (12 commands)
+
 - `system info` - Comprehensive system information
 - `system uptime` - System uptime
 - `system processes` - Top processes by memory
@@ -54,6 +58,7 @@ ProfileCore is a **unified cross-shell interface** that provides 97 powerful com
 - `system service-status` - Check service status
 
 ### Network Utilities (8 commands)
+
 - `network public-ip` - Get public IP address
 - `network test-port` - Test TCP connectivity
 - `network local-ips` - List local network IPs
@@ -64,6 +69,7 @@ ProfileCore is a **unified cross-shell interface** that provides 97 powerful com
 - `network ping` - Ping host
 
 ### Git Operations (16 commands)
+
 - `git status` - Repository status
 - `git log` - Commit history
 - `git diff` - Working tree changes
@@ -82,17 +88,20 @@ ProfileCore is a **unified cross-shell interface** that provides 97 powerful com
 - `git rebase` - Rebase branch
 
 ### Docker Integration (3 commands)
+
 - `docker ps` - List containers
 - `docker stats` - Container resource stats
 - `docker logs` - Container logs
 
 ### Security Tools (4 commands)
+
 - `security ssl-check` - Check SSL certificate
 - `security gen-password` - Generate secure password
 - `security check-password` - Check password strength
 - `security hash-password` - Hash password (argon2/bcrypt)
 
 ### Package Management (7 commands)
+
 - `package install` - Install package (auto-detect PM)
 - `package list` - List installed packages
 - `package search` - Search for packages
@@ -102,6 +111,7 @@ ProfileCore is a **unified cross-shell interface** that provides 97 powerful com
 - `package info` - Show package information
 
 ### File Operations (5 commands)
+
 - `file hash` - Calculate file hash (MD5/SHA256)
 - `file size` - Get file/directory size
 - `file find` - Find files by pattern
@@ -109,43 +119,51 @@ ProfileCore is a **unified cross-shell interface** that provides 97 powerful com
 - `file type` - Detect file type
 
 ### Environment Variables (3 commands)
+
 - `env list` - List all environment variables
 - `env get` - Get environment variable
 - `env set` - Set environment variable
 
 ### Text Processing (3 commands)
+
 - `text grep` - Search text in files
 - `text head` - Show first N lines
 - `text tail` - Show last N lines
 
 ### Process Management (4 commands)
+
 - `process list` - List running processes
 - `process kill` - Terminate process
 - `process info` - Show process information
 - `process tree` - Show process tree
 
 ### Archive Operations (3 commands)
+
 - `archive compress` - Compress files/directories
 - `archive extract` - Extract archive
 - `archive list` - List archive contents
 
 ### String Utilities (3 commands)
+
 - `string base64` - Base64 encode/decode
 - `string url-encode` - URL encode/decode
 - `string hash` - Hash string (MD5/SHA256)
 
 ### HTTP Utilities (4 commands)
+
 - `http get` - HTTP GET request
 - `http post` - HTTP POST request
 - `http download` - Download file from URL
 - `http head` - HTTP HEAD request
 
 ### Data Processing (3 commands)
+
 - `data json` - Format or minify JSON
 - `data yaml-to-json` - Convert YAML to JSON
 - `data json-to-yaml` - Convert JSON to YAML
 
 ### Shell Utilities (5 commands)
+
 - `shell history` - Show shell history
 - `shell which` - Find command in PATH
 - `shell exec` - Execute command
@@ -153,6 +171,7 @@ ProfileCore is a **unified cross-shell interface** that provides 97 powerful com
 - `shell alias` - List ProfileCore aliases
 
 ### Utility Commands (10 commands)
+
 - `utils calc` - Calculator (math expressions)
 - `utils random` - Random number generator
 - `utils random-string` - Random string generator
@@ -165,6 +184,7 @@ ProfileCore is a **unified cross-shell interface** that provides 97 powerful com
 - `utils config-list` - List configuration
 
 ### Initialization & Maintenance (4 commands)
+
 - `init <shell>` - Generate shell initialization code
 - `completions <shell>` - Generate shell completions
 - `uninstall-legacy` - Remove v6.0.0 PowerShell modules
@@ -176,6 +196,7 @@ ProfileCore is a **unified cross-shell interface** that provides 97 powerful com
 ## 🛠️ Tech Stack
 
 ### Core Libraries
+
 - **gumdrop** 0.8 - Ultra-fast argument parsing (~160ns)
 - **sysinfo** 0.31 - System information, processes, sensors
 - **git2** 0.18 - Git operations & repository management
@@ -186,6 +207,7 @@ ProfileCore is a **unified cross-shell interface** that provides 97 powerful com
 - **reqwest** 0.12 - HTTP client (GET/POST/HEAD/download)
 
 ### Utilities
+
 - **which** 6.0 - Find executables in PATH
 - **tokio** 1.x + **futures** 0.3 - Async runtime
 - **meval** 0.2 - Mathematical expression evaluation
@@ -194,6 +216,7 @@ ProfileCore is a **unified cross-shell interface** that provides 97 powerful com
 - **serde**, **serde_json**, **serde_yaml**, **toml** - Data processing
 
 ### User Experience
+
 - **comfy-table** 7.1 - Beautiful ASCII tables
 - **colored** 2.1 - ANSI colors
 - **indicatif** 0.17 - Progress bars
@@ -206,6 +229,7 @@ ProfileCore is a **unified cross-shell interface** that provides 97 powerful com
 ### Pre-built Binary (Recommended)
 
 **Linux/macOS:**
+
 ```bash
 # Download and install
 curl -sSL https://github.com/mythic3011/ProfileCore/releases/download/v1.0.0/profilecore-linux-x86_64 -o profilecore
@@ -219,6 +243,7 @@ echo 'profilecore init fish | source' >> ~/.config/fish/config.fish  # fish
 ```
 
 **Windows (PowerShell):**
+
 ```powershell
 # Download and install
 irm https://github.com/mythic3011/ProfileCore/releases/download/v1.0.0/profilecore-windows-x86_64.exe -OutFile profilecore.exe
@@ -264,6 +289,7 @@ cargo build --release
 ## 🎨 Examples
 
 ### System Monitoring
+
 ```bash
 # Get comprehensive system info
 profilecore system info
@@ -279,6 +305,7 @@ profilecore system load
 ```
 
 ### Git Multi-Account Management
+
 ```bash
 # Add git accounts
 profilecore git add-account --name work --email work@company.com
@@ -292,6 +319,7 @@ profilecore git whoami
 ```
 
 ### Network Utilities
+
 ```bash
 # Check public IP
 profilecore network public-ip
@@ -307,6 +335,7 @@ profilecore network trace github.com
 ```
 
 ### Data Processing
+
 ```bash
 # Format JSON
 echo '{"name":"test"}' | profilecore data json
@@ -319,6 +348,7 @@ profilecore data json --minify '{"test": "value"}'
 ```
 
 ### HTTP & Downloads
+
 ```bash
 # HTTP GET request
 profilecore http get https://api.github.com
@@ -337,11 +367,13 @@ profilecore http head https://example.com
 ProfileCore v1.0.0 is a **complete rewrite** in Rust. The old PowerShell modules are deprecated.
 
 ### Uninstall v6.0.0
+
 ```bash
 profilecore uninstall-legacy
 ```
 
 ### Key Differences
+
 - **Language**: Pure Rust (no PowerShell modules)
 - **Performance**: 3-4x faster startup
 - **Commands**: 97 commands (vs 30 in v6.0.0)
@@ -374,6 +406,7 @@ MIT License - See `LICENSE` file
 ## 🙏 Acknowledgments
 
 Built with amazing Rust crates from the community. Special thanks to:
+
 - The Rust team for an incredible language
 - All crate authors whose work makes this possible
 - The cross-platform system programming community
@@ -390,5 +423,4 @@ Built with amazing Rust crates from the community. Special thanks to:
 
 **🎉 Thank you for using ProfileCore v1.0.0!**
 
-*Built with ❤️ in Rust*
-
+_Built with ❤️ in Rust_
