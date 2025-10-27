@@ -2,9 +2,7 @@
 
 use colored::Colorize;
 use reqwest::blocking::Client;
-use std::collections::HashMap;
 use std::fs::File;
-use std::io::Write;
 
 pub fn get(url: &str, headers: Option<Vec<(String, String)>>) {
     println!("\n{} {}", "HTTP GET:".cyan().bold(), url.yellow());

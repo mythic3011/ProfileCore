@@ -69,6 +69,7 @@ impl GitAccountsConfig {
         self.accounts.iter().find(|a| a.name == name)
     }
     
+    #[allow(dead_code)]
     pub fn remove_account(&mut self, name: &str) -> Result<()> {
         let original_len = self.accounts.len();
         self.accounts.retain(|a| a.name != name);

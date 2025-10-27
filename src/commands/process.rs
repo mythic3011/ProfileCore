@@ -2,7 +2,7 @@
 
 use colored::Colorize;
 use comfy_table::{Table, presets::UTF8_FULL, Cell, Color};
-use sysinfo::{System, Pid, Process};
+use sysinfo::{System, Pid};
 use std::process::Command as StdCommand;
 
 pub fn list(limit: usize) {

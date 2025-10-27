@@ -1,6 +1,7 @@
 //! System information commands (using sysinfo library)
 
-use sysinfo::{System, Disks, Networks, Components};
+use sysinfo::System;
+use sysinfo::Disks;
 use comfy_table::{Table, presets::UTF8_FULL, Cell, Color};
 use colored::Colorize;
 

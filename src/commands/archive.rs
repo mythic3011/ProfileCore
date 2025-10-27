@@ -2,7 +2,7 @@
 
 use colored::Colorize;
 use std::fs::{self, File};
-use std::io::{self, Read, Write};
+use std::io;
 use std::path::Path;
 use flate2::Compression;
 use flate2::read::GzDecoder;

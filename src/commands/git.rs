@@ -748,7 +748,8 @@ pub fn commit(message: &str, all: bool) {
         }
     };
     
-    let repo = match git2::Repository::open(&current_dir) {
+    // Verify we're in a git repository
+    let _repo = match git2::Repository::open(&current_dir) {
         Ok(r) => r,
         Err(e) => {
             eprintln!("{} Not a git repository: {}", "✗".red(), e);
