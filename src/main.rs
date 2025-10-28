@@ -8,18 +8,19 @@ use std::process;
 
 // Import command modules
 mod commands;
-mod init;
 mod completions;
 mod config;
+mod init;
+mod utils;
 
 #[derive(Options)]
 struct Cli {
     #[options(help = "show help message")]
     help: bool,
-    
+
     #[options(help = "show version")]
     version: bool,
-    
+
     #[options(command)]
     command: Option<Command>,
 }
@@ -28,64 +29,64 @@ struct Cli {
 enum Command {
     #[options(help = "generate shell-specific initialization code")]
     Init(InitOpts),
-    
+
     #[options(help = "generate shell completions")]
     Completions(CompletionsOpts),
-    
+
     #[options(help = "system information commands")]
     System(SystemOpts),
-    
+
     #[options(help = "network utility commands")]
     Network(NetworkOpts),
-    
+
     #[options(help = "git operations")]
     Git(GitOpts),
-    
+
     #[options(help = "docker operations")]
     Docker(DockerOpts),
-    
+
     #[options(help = "security tools")]
     Security(SecurityOpts),
-    
+
     #[options(help = "package management")]
     Package(PackageOpts),
-    
+
     #[options(help = "file operations")]
     File(FileOpts),
-    
+
     #[options(help = "environment variable operations")]
     Env(EnvOpts),
-    
+
     #[options(help = "text processing commands")]
     Text(TextOpts),
-    
+
     #[options(help = "process management commands")]
     Process(ProcessOpts),
-    
+
     #[options(help = "archive operations")]
     Archive(ArchiveOpts),
-    
+
     #[options(help = "string utility commands")]
     String(StringOpts),
-    
+
     #[options(help = "HTTP utility commands")]
     Http(HttpOpts),
-    
+
     #[options(help = "data processing commands")]
     Data(DataOpts),
-    
+
     #[options(help = "shell utility commands")]
     Shell(ShellOpts),
-    
+
     #[options(help = "utility commands (calc, random, time, config)")]
     Utils(UtilsOpts),
-    
+
     #[options(help = "install ProfileCore to your shell (interactive)")]
     Install(InstallOpts),
-    
+
     #[options(help = "uninstall ProfileCore from your shell")]
     Uninstall(UninstallOpts2),
-    
+
     #[options(help = "uninstall legacy v6.0.0 PowerShell modules")]
     UninstallLegacy(UninstallOpts),
 }
@@ -94,25 +95,25 @@ enum Command {
 struct InitOpts {
     #[options(help = "show help for init")]
     help: bool,
-    
+
     #[options(free, help = "target shell: bash, zsh, fish, powershell")]
-        shell: String,
+    shell: String,
 }
 
 #[derive(Options)]
 struct CompletionsOpts {
     #[options(help = "show help for completions")]
     help: bool,
-    
+
     #[options(free, help = "target shell: bash, zsh, fish, powershell")]
-        shell: String,
+    shell: String,
 }
 
 #[derive(Options)]
 struct SystemOpts {
     #[options(help = "show help for system")]
     help: bool,
-    
+
     #[options(command)]
     command: Option<SystemCmd>,
 }
@@ -121,37 +122,37 @@ struct SystemOpts {
 enum SystemCmd {
     #[options(help = "display system information")]
     Info(InfoOpts),
-    
+
     #[options(help = "show system uptime")]
     Uptime(UptimeOpts),
-    
+
     #[options(help = "show top processes")]
     Processes(ProcessesOpts),
-    
+
     #[options(help = "show disk usage")]
     DiskUsage(DiskUsageOpts),
-    
+
     #[options(help = "show memory information")]
     Memory(MemoryOpts),
-    
+
     #[options(help = "show CPU information")]
     Cpu(CpuOpts),
-    
+
     #[options(help = "show system load average")]
     Load(LoadOpts),
-    
+
     #[options(help = "show network statistics")]
     NetworkStats(NetworkStatsOpts),
-    
+
     #[options(help = "show temperature sensors")]
     Temperature(TemperatureOpts),
-    
+
     #[options(help = "list system users")]
     Users(UsersOpts),
-    
+
     #[options(help = "list system services")]
     ServiceList(ServiceListOpts),
-    
+
     #[options(help = "show service status")]
     ServiceStatus(ServiceStatusOpts),
 }
@@ -160,7 +161,7 @@ enum SystemCmd {
 struct InfoOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(help = "output format: text, json")]
     format: Option<String>,
 }
@@ -175,7 +176,7 @@ struct UptimeOpts {
 struct ProcessesOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(help = "number of processes to show", default = "10", meta = "N")]
     limit: usize,
 }
@@ -232,7 +233,7 @@ struct ServiceListOpts {
 struct ServiceStatusOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "service name")]
     name: String,
 }
@@ -241,7 +242,7 @@ struct ServiceStatusOpts {
 struct NetworkOpts {
     #[options(help = "show help for network")]
     help: bool,
-    
+
     #[options(command)]
     command: Option<NetworkCmd>,
 }
@@ -250,25 +251,25 @@ struct NetworkOpts {
 enum NetworkCmd {
     #[options(help = "get public IP address")]
     PublicIp(PublicIpOpts),
-    
+
     #[options(help = "test port connectivity")]
     TestPort(TestPortOpts),
-    
+
     #[options(help = "get local network IPs")]
     LocalIps(LocalIpsOpts),
-    
+
     #[options(help = "DNS lookup (A, AAAA, MX records)")]
     Dns(DnsOpts),
-    
+
     #[options(help = "reverse DNS lookup (PTR records)")]
     ReverseDns(ReverseDnsOpts),
-    
+
     #[options(help = "WHOIS domain lookup")]
     Whois(WhoisOpts),
-    
+
     #[options(help = "traceroute to host")]
     Trace(TraceOpts),
-    
+
     #[options(help = "ping host")]
     Ping(PingOpts),
 }
@@ -283,10 +284,10 @@ struct PublicIpOpts {
 struct TestPortOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "host to test")]
     host: String,
-    
+
     #[options(free, help = "port to test")]
     port: Option<u16>,
 }
@@ -301,7 +302,7 @@ struct LocalIpsOpts {
 struct DnsOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "domain name to lookup")]
     domain: String,
 }
@@ -310,7 +311,7 @@ struct DnsOpts {
 struct ReverseDnsOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "IP address for reverse lookup")]
     ip: String,
 }
@@ -319,7 +320,7 @@ struct ReverseDnsOpts {
 struct WhoisOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "domain to lookup")]
     domain: String,
 }
@@ -328,10 +329,10 @@ struct WhoisOpts {
 struct TraceOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "host to traceroute")]
     host: String,
-    
+
     #[options(help = "maximum hops", default = "30", meta = "N")]
     max_hops: u32,
 }
@@ -340,10 +341,10 @@ struct TraceOpts {
 struct PingOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "host to ping")]
     host: String,
-    
+
     #[options(help = "number of packets", default = "4", meta = "N")]
     count: u32,
 }
@@ -352,7 +353,7 @@ struct PingOpts {
 struct GitOpts {
     #[options(help = "show help for git")]
     help: bool,
-    
+
     #[options(command)]
     command: Option<GitCmd>,
 }
@@ -361,49 +362,49 @@ struct GitOpts {
 enum GitCmd {
     #[options(help = "show git status")]
     Status(GitStatusOpts),
-    
+
     #[options(help = "show git log")]
     Log(GitLogOpts),
-    
+
     #[options(help = "show working tree changes")]
     Diff(DiffOpts),
-    
+
     #[options(help = "list branches")]
     Branch(BranchOpts),
-    
+
     #[options(help = "list remote repositories")]
     Remote(RemoteOpts),
-    
+
     #[options(help = "switch git account")]
     SwitchAccount(SwitchAccountOpts),
-    
+
     #[options(help = "add a new git account")]
     AddAccount(AddAccountOpts),
-    
+
     #[options(help = "list all git accounts")]
     ListAccounts(ListAccountsOpts),
-    
+
     #[options(help = "show current git identity")]
     Whoami(WhoamiOpts),
-    
+
     #[options(help = "clone a repository")]
     Clone(CloneOpts),
-    
+
     #[options(help = "pull from remote")]
     Pull(PullOpts),
-    
+
     #[options(help = "push to remote")]
     Push(PushOpts),
-    
+
     #[options(help = "stash changes")]
     Stash(StashOpts),
-    
+
     #[options(help = "create a commit")]
     Commit(CommitOpts),
-    
+
     #[options(help = "create or list tags")]
     Tag(TagOpts),
-    
+
     #[options(help = "rebase current branch")]
     Rebase(RebaseOpts),
 }
@@ -418,7 +419,7 @@ struct GitStatusOpts {
 struct GitLogOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(help = "number of commits to show", default = "10", meta = "N")]
     limit: usize,
 }
@@ -433,7 +434,7 @@ struct DiffOpts {
 struct BranchOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(help = "list all branches", short = "a")]
     all: bool,
 }
@@ -448,7 +449,7 @@ struct RemoteOpts {
 struct SwitchAccountOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "account name")]
     account: String,
 }
@@ -457,13 +458,13 @@ struct SwitchAccountOpts {
 struct AddAccountOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "account name")]
     name: String,
-    
+
     #[options(free, help = "email address")]
     email: String,
-    
+
     #[options(help = "GPG/SSH signing key", meta = "KEY")]
     signing_key: Option<String>,
 }
@@ -484,7 +485,7 @@ struct WhoamiOpts {
 struct CloneOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "repository URL and optional path")]
     args: Vec<String>,
 }
@@ -499,10 +500,10 @@ struct PullOpts {
 struct PushOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(help = "remote name", meta = "REMOTE")]
     remote: Option<String>,
-    
+
     #[options(help = "branch name", meta = "BRANCH")]
     branch: Option<String>,
 }
@@ -511,7 +512,7 @@ struct PushOpts {
 struct StashOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "stash action: save, pop, list, clear")]
     action: Option<String>,
 }
@@ -520,10 +521,10 @@ struct StashOpts {
 struct CommitOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "commit message")]
     message: String,
-    
+
     #[options(help = "stage all changes", short = "a")]
     all: bool,
 }
@@ -532,13 +533,13 @@ struct CommitOpts {
 struct TagOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "tag name")]
     name: Option<String>,
-    
+
     #[options(help = "annotated tag message", short = "m", meta = "MSG")]
     message: Option<String>,
-    
+
     #[options(help = "list all tags", short = "l")]
     list: bool,
 }
@@ -547,10 +548,10 @@ struct TagOpts {
 struct RebaseOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "branch to rebase onto")]
     branch: String,
-    
+
     #[options(help = "interactive rebase", short = "i")]
     interactive: bool,
 }
@@ -559,7 +560,7 @@ struct RebaseOpts {
 struct DockerOpts {
     #[options(help = "show help for docker")]
     help: bool,
-    
+
     #[options(command)]
     command: Option<DockerCmd>,
 }
@@ -568,10 +569,10 @@ struct DockerOpts {
 enum DockerCmd {
     #[options(help = "list docker containers")]
     Ps(DockerPsOpts),
-    
+
     #[options(help = "show container stats")]
     Stats(StatsOpts),
-    
+
     #[options(help = "show container logs")]
     Logs(LogsOpts),
 }
@@ -586,7 +587,7 @@ struct DockerPsOpts {
 struct StatsOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "container name or ID")]
     container: String,
 }
@@ -595,10 +596,10 @@ struct StatsOpts {
 struct LogsOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "container name or ID")]
     container: String,
-    
+
     #[options(help = "number of lines to show", default = "50", meta = "N")]
     lines: usize,
 }
@@ -607,7 +608,7 @@ struct LogsOpts {
 struct SecurityOpts {
     #[options(help = "show help for security")]
     help: bool,
-    
+
     #[options(command)]
     command: Option<SecurityCmd>,
 }
@@ -616,13 +617,13 @@ struct SecurityOpts {
 enum SecurityCmd {
     #[options(help = "check SSL certificate")]
     SslCheck(SslCheckOpts),
-    
+
     #[options(help = "generate password")]
     GenPassword(GenPasswordOpts),
-    
+
     #[options(help = "check password strength")]
     CheckPassword(CheckPasswordOpts),
-    
+
     #[options(help = "hash password (argon2/bcrypt)")]
     HashPassword(HashPasswordOpts),
 }
@@ -631,7 +632,7 @@ enum SecurityCmd {
 struct SslCheckOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "domain to check")]
     domain: String,
 }
@@ -640,7 +641,7 @@ struct SslCheckOpts {
 struct GenPasswordOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(help = "password length", default = "16")]
     length: usize,
 }
@@ -649,7 +650,7 @@ struct GenPasswordOpts {
 struct CheckPasswordOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "password to check")]
     password: String,
 }
@@ -658,11 +659,15 @@ struct CheckPasswordOpts {
 struct HashPasswordOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "password to hash")]
     password: String,
-    
-    #[options(help = "hashing algorithm (argon2/bcrypt)", default = "argon2", meta = "ALG")]
+
+    #[options(
+        help = "hashing algorithm (argon2/bcrypt)",
+        default = "argon2",
+        meta = "ALG"
+    )]
     algorithm: String,
 }
 
@@ -670,7 +675,7 @@ struct HashPasswordOpts {
 struct PackageOpts {
     #[options(help = "show help for package")]
     help: bool,
-    
+
     #[options(command)]
     command: Option<PackageCmd>,
 }
@@ -679,22 +684,22 @@ struct PackageOpts {
 enum PackageCmd {
     #[options(help = "install package")]
     Install(PackageInstallOpts),
-    
+
     #[options(help = "list installed packages")]
     List(ListOpts),
-    
+
     #[options(help = "search for packages")]
     Search(SearchOpts),
-    
+
     #[options(help = "update package lists")]
     Update(UpdateOpts),
-    
+
     #[options(help = "upgrade a package")]
     Upgrade(UpgradeOpts),
-    
+
     #[options(help = "remove a package")]
     Remove(RemoveOpts),
-    
+
     #[options(help = "show package information")]
     Info(PackageInfoOpts),
 }
@@ -703,7 +708,7 @@ enum PackageCmd {
 struct PackageInstallOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "package name")]
     package: String,
 }
@@ -718,7 +723,7 @@ struct ListOpts {
 struct SearchOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "search query")]
     query: String,
 }
@@ -733,7 +738,7 @@ struct UpdateOpts {
 struct UpgradeOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "package name")]
     package: String,
 }
@@ -742,7 +747,7 @@ struct UpgradeOpts {
 struct RemoveOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "package name")]
     package: String,
 }
@@ -751,7 +756,7 @@ struct RemoveOpts {
 struct PackageInfoOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "package name")]
     package: String,
 }
@@ -760,7 +765,7 @@ struct PackageInfoOpts {
 struct FileOpts {
     #[options(help = "show help for file")]
     help: bool,
-    
+
     #[options(command)]
     command: Option<FileCmd>,
 }
@@ -769,16 +774,16 @@ struct FileOpts {
 enum FileCmd {
     #[options(help = "calculate file hash")]
     Hash(HashOpts),
-    
+
     #[options(help = "get file/directory size")]
     Size(SizeOpts),
-    
+
     #[options(help = "find files by pattern")]
     Find(FindOpts),
-    
+
     #[options(help = "show file permissions")]
     Permissions(PermissionsOpts),
-    
+
     #[options(help = "detect file type")]
     Type(TypeOpts),
 }
@@ -787,11 +792,15 @@ enum FileCmd {
 struct HashOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "file path")]
     file: String,
-    
-    #[options(help = "hash algorithm: md5, sha256, all", default = "sha256", meta = "ALG")]
+
+    #[options(
+        help = "hash algorithm: md5, sha256, all",
+        default = "sha256",
+        meta = "ALG"
+    )]
     algorithm: String,
 }
 
@@ -799,7 +808,7 @@ struct HashOpts {
 struct SizeOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "file or directory path")]
     path: String,
 }
@@ -808,10 +817,10 @@ struct SizeOpts {
 struct FindOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "search pattern (supports wildcards)")]
     pattern: String,
-    
+
     #[options(help = "directory to search", default = ".", meta = "DIR")]
     directory: String,
 }
@@ -820,7 +829,7 @@ struct FindOpts {
 struct PermissionsOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "file path")]
     file: String,
 }
@@ -829,7 +838,7 @@ struct PermissionsOpts {
 struct TypeOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "file path")]
     file: String,
 }
@@ -838,7 +847,7 @@ struct TypeOpts {
 struct EnvOpts {
     #[options(help = "show help for env")]
     help: bool,
-    
+
     #[options(command)]
     command: Option<EnvCmd>,
 }
@@ -847,10 +856,10 @@ struct EnvOpts {
 enum EnvCmd {
     #[options(help = "list all environment variables")]
     List(ListEnvOpts),
-    
+
     #[options(help = "get environment variable")]
     Get(GetEnvOpts),
-    
+
     #[options(help = "set environment variable")]
     Set(SetEnvOpts),
 }
@@ -865,7 +874,7 @@ struct ListEnvOpts {
 struct GetEnvOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "variable name")]
     variable: String,
 }
@@ -874,7 +883,7 @@ struct GetEnvOpts {
 struct SetEnvOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "variable name and value")]
     args: Vec<String>,
 }
@@ -883,7 +892,7 @@ struct SetEnvOpts {
 struct TextOpts {
     #[options(help = "show help for text")]
     help: bool,
-    
+
     #[options(command)]
     command: Option<TextCmd>,
 }
@@ -892,10 +901,10 @@ struct TextOpts {
 enum TextCmd {
     #[options(help = "search text in file (grep)")]
     Grep(GrepOpts),
-    
+
     #[options(help = "show first N lines")]
     Head(HeadOpts),
-    
+
     #[options(help = "show last N lines")]
     Tail(TailOpts),
 }
@@ -904,10 +913,10 @@ enum TextCmd {
 struct GrepOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "pattern and file path")]
     args: Vec<String>,
-    
+
     #[options(help = "ignore case", short = "i")]
     ignore_case: bool,
 }
@@ -916,10 +925,10 @@ struct GrepOpts {
 struct HeadOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "file path")]
     file: String,
-    
+
     #[options(help = "number of lines", short = "n", default = "10", meta = "N")]
     lines: usize,
 }
@@ -928,10 +937,10 @@ struct HeadOpts {
 struct TailOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "file path")]
     file: String,
-    
+
     #[options(help = "number of lines", short = "n", default = "10", meta = "N")]
     lines: usize,
 }
@@ -940,7 +949,7 @@ struct TailOpts {
 struct ProcessOpts {
     #[options(help = "show help for process")]
     help: bool,
-    
+
     #[options(command)]
     command: Option<ProcessCmd>,
 }
@@ -949,13 +958,13 @@ struct ProcessOpts {
 enum ProcessCmd {
     #[options(help = "list running processes")]
     List(ProcessListOpts),
-    
+
     #[options(help = "terminate a process")]
     Kill(KillOpts),
-    
+
     #[options(help = "show process information")]
     Info(ProcessInfoOpts),
-    
+
     #[options(help = "show process tree")]
     Tree(ProcessTreeOpts),
 }
@@ -964,8 +973,13 @@ enum ProcessCmd {
 struct ProcessListOpts {
     #[options(help = "show help")]
     help: bool,
-    
-    #[options(help = "number of processes to show", short = "n", default = "20", meta = "N")]
+
+    #[options(
+        help = "number of processes to show",
+        short = "n",
+        default = "20",
+        meta = "N"
+    )]
     limit: usize,
 }
 
@@ -973,10 +987,10 @@ struct ProcessListOpts {
 struct KillOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "process ID")]
     pid: u32,
-    
+
     #[options(help = "force kill", short = "f")]
     force: bool,
 }
@@ -985,7 +999,7 @@ struct KillOpts {
 struct ProcessInfoOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "process ID")]
     pid: u32,
 }
@@ -1000,7 +1014,7 @@ struct ProcessTreeOpts {
 struct ArchiveOpts {
     #[options(help = "show help for archive")]
     help: bool,
-    
+
     #[options(command)]
     command: Option<ArchiveCmd>,
 }
@@ -1009,10 +1023,10 @@ struct ArchiveOpts {
 enum ArchiveCmd {
     #[options(help = "compress files/directories")]
     Compress(CompressOpts),
-    
+
     #[options(help = "extract archive")]
     Extract(ExtractOpts),
-    
+
     #[options(help = "list archive contents")]
     List(ArchiveListOpts),
 }
@@ -1021,11 +1035,16 @@ enum ArchiveCmd {
 struct CompressOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "source and output paths")]
     args: Vec<String>,
-    
-    #[options(help = "format: gzip, tar, tar.gz, zip", short = "f", default = "tar.gz", meta = "FMT")]
+
+    #[options(
+        help = "format: gzip, tar, tar.gz, zip",
+        short = "f",
+        default = "tar.gz",
+        meta = "FMT"
+    )]
     format: String,
 }
 
@@ -1033,7 +1052,7 @@ struct CompressOpts {
 struct ExtractOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "archive and destination paths")]
     args: Vec<String>,
 }
@@ -1042,7 +1061,7 @@ struct ExtractOpts {
 struct ArchiveListOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "archive path")]
     archive: String,
 }
@@ -1051,7 +1070,7 @@ struct ArchiveListOpts {
 struct StringOpts {
     #[options(help = "show help for string")]
     help: bool,
-    
+
     #[options(command)]
     command: Option<StringCmd>,
 }
@@ -1060,10 +1079,10 @@ struct StringOpts {
 enum StringCmd {
     #[options(help = "base64 encode/decode")]
     Base64(Base64Opts),
-    
+
     #[options(help = "URL encode/decode")]
     UrlEncode(UrlEncodeOpts),
-    
+
     #[options(help = "hash string")]
     Hash(StringHashOpts),
 }
@@ -1072,10 +1091,10 @@ enum StringCmd {
 struct Base64Opts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "input string")]
     input: String,
-    
+
     #[options(help = "decode instead of encode", short = "d")]
     decode: bool,
 }
@@ -1084,10 +1103,10 @@ struct Base64Opts {
 struct UrlEncodeOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "input string")]
     input: String,
-    
+
     #[options(help = "decode instead of encode", short = "d")]
     decode: bool,
 }
@@ -1096,11 +1115,15 @@ struct UrlEncodeOpts {
 struct StringHashOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "input string")]
     input: String,
-    
-    #[options(help = "hash algorithm: md5, sha256, all", default = "sha256", meta = "ALG")]
+
+    #[options(
+        help = "hash algorithm: md5, sha256, all",
+        default = "sha256",
+        meta = "ALG"
+    )]
     algorithm: String,
 }
 
@@ -1108,7 +1131,7 @@ struct StringHashOpts {
 struct HttpOpts {
     #[options(help = "show help for http")]
     help: bool,
-    
+
     #[options(command)]
     command: Option<HttpCmd>,
 }
@@ -1117,13 +1140,13 @@ struct HttpOpts {
 enum HttpCmd {
     #[options(help = "HTTP GET request")]
     Get(HttpGetOpts),
-    
+
     #[options(help = "HTTP POST request")]
     Post(HttpPostOpts),
-    
+
     #[options(help = "download file")]
     Download(HttpDownloadOpts),
-    
+
     #[options(help = "HTTP HEAD request")]
     Head(HttpHeadOpts),
 }
@@ -1132,7 +1155,7 @@ enum HttpCmd {
 struct HttpGetOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "URL to request")]
     url: String,
 }
@@ -1141,10 +1164,10 @@ struct HttpGetOpts {
 struct HttpPostOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "URL and request body")]
     args: Vec<String>,
-    
+
     #[options(help = "content type", default = "application/json", meta = "TYPE")]
     content_type: String,
 }
@@ -1153,7 +1176,7 @@ struct HttpPostOpts {
 struct HttpDownloadOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "URL and output file")]
     args: Vec<String>,
 }
@@ -1162,7 +1185,7 @@ struct HttpDownloadOpts {
 struct HttpHeadOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "URL to request")]
     url: String,
 }
@@ -1171,7 +1194,7 @@ struct HttpHeadOpts {
 struct DataOpts {
     #[options(help = "show help for data")]
     help: bool,
-    
+
     #[options(command)]
     command: Option<DataCmd>,
 }
@@ -1180,10 +1203,10 @@ struct DataOpts {
 enum DataCmd {
     #[options(help = "format or minify JSON")]
     Json(DataJsonOpts),
-    
+
     #[options(help = "convert YAML to JSON")]
     YamlToJson(DataYamlToJsonOpts),
-    
+
     #[options(help = "convert JSON to YAML")]
     JsonToYaml(DataJsonToYamlOpts),
 }
@@ -1192,10 +1215,10 @@ enum DataCmd {
 struct DataJsonOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "JSON input string")]
     input: String,
-    
+
     #[options(help = "minify instead of format", short = "m")]
     minify: bool,
 }
@@ -1204,7 +1227,7 @@ struct DataJsonOpts {
 struct DataYamlToJsonOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "YAML input string")]
     input: String,
 }
@@ -1213,7 +1236,7 @@ struct DataYamlToJsonOpts {
 struct DataJsonToYamlOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "JSON input string")]
     input: String,
 }
@@ -1222,7 +1245,7 @@ struct DataJsonToYamlOpts {
 struct ShellOpts {
     #[options(help = "show help for shell")]
     help: bool,
-    
+
     #[options(command)]
     command: Option<ShellCmd>,
 }
@@ -1231,16 +1254,16 @@ struct ShellOpts {
 enum ShellCmd {
     #[options(help = "show shell history")]
     History(HistoryOpts),
-    
+
     #[options(help = "find command in PATH")]
     Which(WhichOpts),
-    
+
     #[options(help = "execute a command")]
     Exec(ExecOpts),
-    
+
     #[options(help = "show PATH variable")]
     Path(PathOpts),
-    
+
     #[options(help = "list aliases")]
     Alias(AliasOpts),
 }
@@ -1249,7 +1272,7 @@ enum ShellCmd {
 struct HistoryOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(help = "number of entries to show", default = "50", meta = "N")]
     limit: usize,
 }
@@ -1258,7 +1281,7 @@ struct HistoryOpts {
 struct WhichOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "command to find")]
     command: String,
 }
@@ -1267,7 +1290,7 @@ struct WhichOpts {
 struct ExecOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "command and arguments")]
     args: Vec<String>,
 }
@@ -1288,7 +1311,7 @@ struct AliasOpts {
 struct UtilsOpts {
     #[options(help = "show help for utils")]
     help: bool,
-    
+
     #[options(command)]
     command: Option<UtilsCmd>,
 }
@@ -1297,31 +1320,31 @@ struct UtilsOpts {
 enum UtilsCmd {
     #[options(help = "calculator")]
     Calc(CalcOpts),
-    
+
     #[options(help = "random number generator")]
     Random(RandomOpts),
-    
+
     #[options(help = "random string generator")]
     RandomString(RandomStringOpts),
-    
+
     #[options(help = "sleep/delay")]
     Sleep(SleepOpts),
-    
+
     #[options(help = "show current time")]
     Time(TimeOpts),
-    
+
     #[options(help = "show time zones")]
     Timezone(TimezoneOpts),
-    
+
     #[options(help = "show version information")]
     Version(VersionOpts),
-    
+
     #[options(help = "get configuration value")]
     ConfigGet(ConfigGetOpts),
-    
+
     #[options(help = "set configuration value")]
     ConfigSet(ConfigSetOpts),
-    
+
     #[options(help = "list configuration")]
     ConfigList(ConfigListOpts),
 }
@@ -1330,7 +1353,7 @@ enum UtilsCmd {
 struct CalcOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "mathematical expression")]
     expression: String,
 }
@@ -1339,13 +1362,13 @@ struct CalcOpts {
 struct RandomOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(help = "minimum value", default = "1", meta = "MIN")]
     min: i64,
-    
+
     #[options(help = "maximum value", default = "100", meta = "MAX")]
     max: i64,
-    
+
     #[options(help = "number of values to generate", default = "1", meta = "N")]
     count: usize,
 }
@@ -1354,11 +1377,15 @@ struct RandomOpts {
 struct RandomStringOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(help = "length of string", default = "16", meta = "N")]
     length: usize,
-    
-    #[options(help = "charset: alpha, numeric, alphanumeric, hex, all", default = "alphanumeric", meta = "SET")]
+
+    #[options(
+        help = "charset: alpha, numeric, alphanumeric, hex, all",
+        default = "alphanumeric",
+        meta = "SET"
+    )]
     charset: String,
 }
 
@@ -1366,7 +1393,7 @@ struct RandomStringOpts {
 struct SleepOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "seconds to sleep")]
     seconds: u64,
 }
@@ -1375,7 +1402,7 @@ struct SleepOpts {
 struct TimeOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(help = "show UTC time", short = "u")]
     utc: bool,
 }
@@ -1396,7 +1423,7 @@ struct VersionOpts {
 struct ConfigGetOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "configuration key")]
     key: String,
 }
@@ -1405,7 +1432,7 @@ struct ConfigGetOpts {
 struct ConfigSetOpts {
     #[options(help = "show help")]
     help: bool,
-    
+
     #[options(free, help = "key and value")]
     args: Vec<String>,
 }
@@ -1436,17 +1463,17 @@ struct UninstallOpts {
 
 fn main() {
     let args = Cli::parse_args_default_or_exit();
-    
+
     if args.version {
         println!("profilecore v1.0.0");
         return;
     }
-    
+
     if args.help || args.command.is_none() {
         print_help();
         return;
     }
-    
+
     match args.command.unwrap() {
         Command::Init(opts) => {
             if opts.help || opts.shell.is_empty() {
@@ -1456,7 +1483,7 @@ fn main() {
             }
             init::generate(&opts.shell);
         }
-        
+
         Command::Completions(opts) => {
             if opts.help || opts.shell.is_empty() {
                 println!("Usage: profilecore completions <shell>");
@@ -1465,14 +1492,14 @@ fn main() {
             }
             completions::generate(&opts.shell);
         }
-        
+
         Command::System(opts) => {
             if opts.help {
                 println!("Usage: profilecore system <command>");
                 println!("Commands: info, uptime, processes, disk-usage, memory, cpu, load, network-stats, temperature, users, service-list, service-status");
                 return;
             }
-            
+
             match opts.command {
                 Some(SystemCmd::Info(info_opts)) => {
                     commands::system::info(info_opts.format.as_deref());
@@ -1516,14 +1543,14 @@ fn main() {
                 }
             }
         }
-        
+
         Command::Network(opts) => {
             if opts.help {
                 println!("Usage: profilecore network <command>");
                 println!("Commands: public-ip, test-port, local-ips, dns, reverse-dns, whois, trace, ping");
                 return;
             }
-            
+
             match opts.command {
                 Some(NetworkCmd::PublicIp(_)) => {
                     commands::network::public_ip();
@@ -1556,14 +1583,14 @@ fn main() {
                 }
             }
         }
-        
+
         Command::Git(opts) => {
             if opts.help {
                 println!("Usage: profilecore git <command>");
                 println!("Commands: status, log, diff, branch, remote, switch-account, add-account, list-accounts, whoami, clone, pull, push, stash, commit, tag, rebase");
                 return;
             }
-            
+
             match opts.command {
                 Some(GitCmd::Status(_)) => {
                     commands::git::status();
@@ -1609,10 +1636,7 @@ fn main() {
                     commands::git::pull();
                 }
                 Some(GitCmd::Push(push_opts)) => {
-                    commands::git::push(
-                        push_opts.remote.as_deref(),
-                        push_opts.branch.as_deref()
-                    );
+                    commands::git::push(push_opts.remote.as_deref(), push_opts.branch.as_deref());
                 }
                 Some(GitCmd::Stash(stash_opts)) => {
                     let action = stash_opts.action.as_deref().unwrap_or("save");
@@ -1640,14 +1664,14 @@ fn main() {
                 }
             }
         }
-        
+
         Command::Docker(opts) => {
             if opts.help {
                 println!("Usage: profilecore docker <command>");
                 println!("Commands: ps, stats, logs");
                 return;
             }
-            
+
             match opts.command {
                 Some(DockerCmd::Ps(_)) => {
                     commands::docker::ps();
@@ -1664,14 +1688,14 @@ fn main() {
                 }
             }
         }
-        
+
         Command::Security(opts) => {
             if opts.help {
                 println!("Usage: profilecore security <command>");
                 println!("Commands: ssl-check, gen-password, check-password, hash-password");
                 return;
             }
-            
+
             match opts.command {
                 Some(SecurityCmd::SslCheck(ssl_opts)) => {
                     commands::security::ssl_check(&ssl_opts.domain);
@@ -1691,14 +1715,14 @@ fn main() {
                 }
             }
         }
-        
+
         Command::Package(opts) => {
             if opts.help {
                 println!("Usage: profilecore package <command>");
                 println!("Commands: install, list, search, update, upgrade, remove, info");
                 return;
             }
-            
+
             match opts.command {
                 Some(PackageCmd::Install(install_opts)) => {
                     commands::package::install(&install_opts.package);
@@ -1727,14 +1751,14 @@ fn main() {
                 }
             }
         }
-        
+
         Command::File(opts) => {
             if opts.help {
                 println!("Usage: profilecore file <command>");
                 println!("Commands: hash, size, find, permissions, type");
                 return;
             }
-            
+
             match opts.command {
                 Some(FileCmd::Hash(hash_opts)) => {
                     commands::file::hash(&hash_opts.file, &hash_opts.algorithm);
@@ -1757,14 +1781,14 @@ fn main() {
                 }
             }
         }
-        
+
         Command::Env(opts) => {
             if opts.help {
                 println!("Usage: profilecore env <command>");
                 println!("Commands: list, get, set");
                 return;
             }
-            
+
             match opts.command {
                 Some(EnvCmd::List(_)) => {
                     commands::env::list();
@@ -1786,14 +1810,14 @@ fn main() {
                 }
             }
         }
-        
+
         Command::Text(opts) => {
             if opts.help {
                 println!("Usage: profilecore text <command>");
                 println!("Commands: grep, head, tail");
                 return;
             }
-            
+
             match opts.command {
                 Some(TextCmd::Grep(grep_opts)) => {
                     if grep_opts.args.len() < 2 {
@@ -1801,7 +1825,11 @@ fn main() {
                         eprintln!("Usage: profilecore text grep <pattern> <file>");
                         process::exit(1);
                     }
-                    commands::text::grep(&grep_opts.args[0], &grep_opts.args[1], grep_opts.ignore_case);
+                    commands::text::grep(
+                        &grep_opts.args[0],
+                        &grep_opts.args[1],
+                        grep_opts.ignore_case,
+                    );
                 }
                 Some(TextCmd::Head(head_opts)) => {
                     commands::text::head(&head_opts.file, head_opts.lines);
@@ -1815,14 +1843,14 @@ fn main() {
                 }
             }
         }
-        
+
         Command::Process(opts) => {
             if opts.help {
                 println!("Usage: profilecore process <command>");
                 println!("Commands: list, kill, info, tree");
                 return;
             }
-            
+
             match opts.command {
                 Some(ProcessCmd::List(list_opts)) => {
                     commands::process::list(list_opts.limit);
@@ -1842,14 +1870,14 @@ fn main() {
                 }
             }
         }
-        
+
         Command::Archive(opts) => {
             if opts.help {
                 println!("Usage: profilecore archive <command>");
                 println!("Commands: compress, extract, list");
                 return;
             }
-            
+
             match opts.command {
                 Some(ArchiveCmd::Compress(compress_opts)) => {
                     if compress_opts.args.len() < 2 {
@@ -1857,7 +1885,11 @@ fn main() {
                         eprintln!("Usage: profilecore archive compress <source> <output>");
                         process::exit(1);
                     }
-                    commands::archive::compress(&compress_opts.args[0], &compress_opts.args[1], &compress_opts.format);
+                    commands::archive::compress(
+                        &compress_opts.args[0],
+                        &compress_opts.args[1],
+                        &compress_opts.format,
+                    );
                 }
                 Some(ArchiveCmd::Extract(extract_opts)) => {
                     if extract_opts.args.len() < 2 {
@@ -1876,14 +1908,14 @@ fn main() {
                 }
             }
         }
-        
+
         Command::String(opts) => {
             if opts.help {
                 println!("Usage: profilecore string <command>");
                 println!("Commands: base64, url-encode, hash");
                 return;
             }
-            
+
             match opts.command {
                 Some(StringCmd::Base64(base64_opts)) => {
                     commands::string::base64_encode_decode(&base64_opts.input, base64_opts.decode);
@@ -1900,14 +1932,14 @@ fn main() {
                 }
             }
         }
-        
+
         Command::Http(opts) => {
             if opts.help {
                 println!("Usage: profilecore http <command>");
                 println!("Commands: get, post, download, head");
                 return;
             }
-            
+
             match opts.command {
                 Some(HttpCmd::Get(get_opts)) => {
                     commands::http::get(&get_opts.url, None);
@@ -1918,7 +1950,11 @@ fn main() {
                         eprintln!("Usage: profilecore http post <url> <body>");
                         process::exit(1);
                     }
-                    commands::http::post(&post_opts.args[0], &post_opts.args[1], &post_opts.content_type);
+                    commands::http::post(
+                        &post_opts.args[0],
+                        &post_opts.args[1],
+                        &post_opts.content_type,
+                    );
                 }
                 Some(HttpCmd::Download(download_opts)) => {
                     if download_opts.args.len() < 2 {
@@ -1937,14 +1973,14 @@ fn main() {
                 }
             }
         }
-        
+
         Command::Data(opts) => {
             if opts.help {
                 println!("Usage: profilecore data <command>");
                 println!("Commands: json, yaml-to-json, json-to-yaml");
                 return;
             }
-            
+
             match opts.command {
                 Some(DataCmd::Json(json_opts)) => {
                     commands::data::json_format(&json_opts.input, json_opts.minify);
@@ -1961,14 +1997,14 @@ fn main() {
                 }
             }
         }
-        
+
         Command::Shell(opts) => {
             if opts.help {
                 println!("Usage: profilecore shell <command>");
                 println!("Commands: history, which, exec, path, alias");
                 return;
             }
-            
+
             match opts.command {
                 Some(ShellCmd::History(hist_opts)) => {
                     commands::shell::history(Some(hist_opts.limit));
@@ -1998,14 +2034,14 @@ fn main() {
                 }
             }
         }
-        
+
         Command::Utils(opts) => {
             if opts.help {
                 println!("Usage: profilecore utils <command>");
                 println!("Commands: calc, random, random-string, sleep, time, timezone, version, config-get, config-set, config-list");
                 return;
             }
-            
+
             match opts.command {
                 Some(UtilsCmd::Calc(calc_opts)) => {
                     commands::utils::calculate(&calc_opts.expression);
@@ -2048,7 +2084,7 @@ fn main() {
                 }
             }
         }
-        
+
         Command::Install(opts) => {
             if opts.help {
                 println!("Usage: profilecore install");
@@ -2063,7 +2099,7 @@ fn main() {
             }
             commands::install::run_installer();
         }
-        
+
         Command::Uninstall(opts) => {
             if opts.help {
                 println!("Usage: profilecore uninstall");
@@ -2072,7 +2108,7 @@ fn main() {
             }
             commands::install::run_uninstaller();
         }
-        
+
         Command::UninstallLegacy(_) => {
             commands::uninstall::uninstall_legacy();
         }

@@ -1,10 +1,10 @@
 //! Docker operations (using bollard library)
 
-use colored::Colorize;
-use bollard::Docker;
 use bollard::container::{ListContainersOptions, StatsOptions};
 use bollard::service::ContainerSummary;
-use comfy_table::{Table, presets::UTF8_FULL, Cell, Color};
+use bollard::Docker;
+use colored::Colorize;
+use comfy_table::{presets::UTF8_FULL, Cell, Color, Table};
 use futures::stream::StreamExt;
 
 pub fn ps() {
@@ -16,7 +16,7 @@ pub fn ps() {
             return;
         }
     };
-    
+
     rt.block_on(async {
         // Connect to Docker
         let docker = match Docker::connect_with_local_defaults() {
@@ -27,23 +27,23 @@ pub fn ps() {
                 return;
             }
         };
-        
+
         // List containers
         let options = Some(ListContainersOptions::<String> {
             all: true,
             ..Default::default()
         });
-        
+
         match docker.list_containers(options).await {
             Ok(containers) => {
                 if containers.is_empty() {
                     println!("{} No containers found", "!".yellow());
                     return;
                 }
-                
+
                 println!("\n{}", "Docker Containers".cyan().bold());
                 println!("{}", "=".repeat(80));
-                
+
                 let mut table = Table::new();
                 table.load_preset(UTF8_FULL);
                 table.set_header(vec![
@@ -53,29 +53,30 @@ pub fn ps() {
                     Cell::new("Status").fg(Color::Cyan),
                     Cell::new("Ports").fg(Color::Cyan),
                 ]);
-                
+
                 for container in containers {
                     let id = container.id.as_deref().unwrap_or("");
                     let short_id = if id.len() > 12 { &id[..12] } else { id };
-                    
-                    let name = container.names
+
+                    let name = container
+                        .names
                         .as_ref()
                         .and_then(|names| names.first())
                         .map(|n| n.trim_start_matches('/'))
                         .unwrap_or("-");
-                    
+
                     let image = container.image.as_deref().unwrap_or("");
                     let state = container.state.as_deref().unwrap_or("");
                     let status_str = container.status.as_deref().unwrap_or("");
-                    
+
                     let ports = format_ports(&container);
-                    
+
                     let status_cell = match state {
                         "running" => Cell::new(status_str).fg(Color::Green),
                         "exited" => Cell::new(status_str).fg(Color::Red),
                         _ => Cell::new(status_str).fg(Color::Yellow),
                     };
-                    
+
                     table.add_row(vec![
                         Cell::new(short_id),
                         Cell::new(name),
@@ -84,7 +85,7 @@ pub fn ps() {
                         Cell::new(&ports),
                     ]);
                 }
-                
+
                 println!("{}\n", table);
             }
             Err(e) => {
@@ -102,7 +103,7 @@ pub fn stats(container_name: &str) {
             return;
         }
     };
-    
+
     rt.block_on(async {
         let docker = match Docker::connect_with_local_defaults() {
             Ok(d) => d,
@@ -111,31 +112,31 @@ pub fn stats(container_name: &str) {
                 return;
             }
         };
-        
+
         println!("\n{} {}", "Container Stats:".cyan().bold(), container_name);
         println!("{}", "=".repeat(60));
-        
+
         let options = Some(StatsOptions {
             stream: false,
             one_shot: true,
         });
-        
+
         let mut stream = docker.stats(container_name, options);
-        
+
         if let Some(result) = stream.next().await {
             match result {
                 Ok(stats) => {
                     // CPU
-                    let cpu_delta = stats.cpu_stats.cpu_usage.total_usage - 
-                                   stats.precpu_stats.cpu_usage.total_usage;
-                    let system_delta = stats.cpu_stats.system_cpu_usage.unwrap_or(0) - 
-                                      stats.precpu_stats.system_cpu_usage.unwrap_or(0);
+                    let cpu_delta = stats.cpu_stats.cpu_usage.total_usage
+                        - stats.precpu_stats.cpu_usage.total_usage;
+                    let system_delta = stats.cpu_stats.system_cpu_usage.unwrap_or(0)
+                        - stats.precpu_stats.system_cpu_usage.unwrap_or(0);
                     let cpu_percent = if system_delta > 0 {
                         (cpu_delta as f64 / system_delta as f64) * 100.0
                     } else {
                         0.0
                     };
-                    
+
                     // Memory
                     let mem_usage = stats.memory_stats.usage.unwrap_or(0) as f64 / 1024.0 / 1024.0;
                     let mem_limit = stats.memory_stats.limit.unwrap_or(0) as f64 / 1024.0 / 1024.0;
@@ -144,11 +145,13 @@ pub fn stats(container_name: &str) {
                     } else {
                         0.0
                     };
-                    
+
                     println!("  CPU Usage:    {:.2}%", cpu_percent);
-                    println!("  Memory Usage: {:.2} MB / {:.2} MB ({:.2}%)", 
-                             mem_usage, mem_limit, mem_percent);
-                    
+                    println!(
+                        "  Memory Usage: {:.2} MB / {:.2} MB ({:.2}%)",
+                        mem_usage, mem_limit, mem_percent
+                    );
+
                     // Network
                     if let Some(networks) = stats.networks {
                         let mut total_rx = 0u64;
@@ -157,10 +160,16 @@ pub fn stats(container_name: &str) {
                             total_rx += net.rx_bytes;
                             total_tx += net.tx_bytes;
                         }
-                        println!("  Network RX:   {:.2} MB", total_rx as f64 / 1024.0 / 1024.0);
-                        println!("  Network TX:   {:.2} MB", total_tx as f64 / 1024.0 / 1024.0);
+                        println!(
+                            "  Network RX:   {:.2} MB",
+                            total_rx as f64 / 1024.0 / 1024.0
+                        );
+                        println!(
+                            "  Network TX:   {:.2} MB",
+                            total_tx as f64 / 1024.0 / 1024.0
+                        );
                     }
-                    
+
                     println!();
                 }
                 Err(e) => {
@@ -181,7 +190,7 @@ pub fn logs(container_name: &str, lines: usize) {
             return;
         }
     };
-    
+
     rt.block_on(async {
         let docker = match Docker::connect_with_local_defaults() {
             Ok(d) => d,
@@ -190,19 +199,24 @@ pub fn logs(container_name: &str, lines: usize) {
                 return;
             }
         };
-        
-        println!("\n{} {} (last {} lines)", "Container Logs:".cyan().bold(), container_name, lines);
+
+        println!(
+            "\n{} {} (last {} lines)",
+            "Container Logs:".cyan().bold(),
+            container_name,
+            lines
+        );
         println!("{}", "=".repeat(60));
-        
+
         let options = Some(bollard::container::LogsOptions::<String> {
             stdout: true,
             stderr: true,
             tail: lines.to_string(),
             ..Default::default()
         });
-        
+
         let mut stream = docker.logs(container_name, options);
-        
+
         while let Some(result) = stream.next().await {
             match result {
                 Ok(log) => {
@@ -214,7 +228,7 @@ pub fn logs(container_name: &str, lines: usize) {
                 }
             }
         }
-        
+
         println!();
     });
 }
@@ -224,16 +238,15 @@ fn format_ports(container: &ContainerSummary) -> String {
         if ports.is_empty() {
             return "-".to_string();
         }
-        
-        let formatted: Vec<String> = ports.iter()
-            .map(|p| {
-                match p.public_port {
-                    Some(public) => format!("{}:{}", public, p.private_port),
-                    None => format!("{}", p.private_port),
-                }
+
+        let formatted: Vec<String> = ports
+            .iter()
+            .map(|p| match p.public_port {
+                Some(public) => format!("{}:{}", public, p.private_port),
+                None => format!("{}", p.private_port),
             })
             .collect();
-        
+
         if formatted.is_empty() {
             "-".to_string()
         } else {

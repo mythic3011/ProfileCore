@@ -16,7 +16,8 @@ pub fn generate(shell: &str) {
 }
 
 fn print_bash_completions() {
-    print!(r#"# ProfileCore bash completions
+    print!(
+        r#"# ProfileCore bash completions
 # Installation: profilecore completions bash > ~/.bash_completion.d/profilecore
 
 _profilecore_completions() {{
@@ -108,11 +109,13 @@ _profilecore_completions() {{
 }}
 
 complete -F _profilecore_completions profilecore
-"#);
+"#
+    );
 }
 
 fn print_zsh_completions() {
-    print!(r#"#compdef profilecore
+    print!(
+        r#"#compdef profilecore
 # ProfileCore zsh completions
 
 _profilecore() {{
@@ -356,11 +359,13 @@ _profilecore() {{
 }}
 
 _profilecore
-"#);
+"#
+    );
 }
 
 fn print_fish_completions() {
-    println!(r#"# ProfileCore fish completions
+    println!(
+        r#"# ProfileCore fish completions
 # Installation: profilecore completions fish > ~/.config/fish/completions/profilecore.fish
 
 # Top-level commands
@@ -511,11 +516,13 @@ complete -c profilecore -f -n "__fish_seen_subcommand_from utils" -a "version" -
 complete -c profilecore -f -n "__fish_seen_subcommand_from utils" -a "config-get" -d "Get configuration value"
 complete -c profilecore -f -n "__fish_seen_subcommand_from utils" -a "config-set" -d "Set configuration value"
 complete -c profilecore -f -n "__fish_seen_subcommand_from utils" -a "config-list" -d "List configuration"
-"#);
+"#
+    );
 }
 
 fn print_powershell_completions() {
-    println!(r#"# ProfileCore PowerShell completions
+    println!(
+        r#"# ProfileCore PowerShell completions
 # Installation: Add to $PROFILE: profilecore completions powershell | Out-String | Invoke-Expression
 
 Register-ArgumentCompleter -CommandName profilecore -ScriptBlock {{
@@ -594,5 +601,6 @@ Register-ArgumentCompleter -CommandName profilecore -ScriptBlock {{
         }}
     }}
 }}
-"#);
+"#
+    );
 }

@@ -91,6 +91,9 @@ panic = "abort"            # Smaller binary, faster panic
 opt-level = 0              # Fast compilation
 debug = true               # Debug symbols
 
+[dev-dependencies]
+tempfile = "3.8"           # Temporary files for testing
+
 # Integration tests disabled - FFI functions can't be tested via extern "C" in same crate
 # FFI is tested when PowerShell loads the module
 # Unit tests in each module provide coverage of underlying functionality

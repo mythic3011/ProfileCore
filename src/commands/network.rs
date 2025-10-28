@@ -1,9 +1,9 @@
 //! Network utility commands
 
 use colored::Colorize;
-use std::net::{TcpStream, ToSocketAddrs, IpAddr};
+use comfy_table::{presets::UTF8_FULL, Cell, Color, Table};
+use std::net::{IpAddr, TcpStream, ToSocketAddrs};
 use std::time::Duration;
-use comfy_table::{Table, presets::UTF8_FULL, Cell, Color};
 use trust_dns_resolver::TokioAsyncResolver;
 
 pub fn public_ip() {
@@ -20,7 +20,7 @@ fn get_public_ip() -> anyhow::Result<String> {
 
 pub fn test_port(host: &str, port: u16) {
     println!("Testing {}:{}...", host, port);
-    
+
     let addr = format!("{}:{}", host, port);
     match addr.to_socket_addrs() {
         Ok(mut addrs) => {
@@ -53,7 +53,7 @@ pub fn dns_lookup(domain: &str) {
             return;
         }
     };
-    
+
     rt.block_on(async {
         // Create resolver with system config
         let resolver = match TokioAsyncResolver::tokio_from_system_conf() {
@@ -63,10 +63,10 @@ pub fn dns_lookup(domain: &str) {
                 return;
             }
         };
-        
+
         println!("\n{} {}", "DNS Lookup:".cyan().bold(), domain);
         println!("{}", "=".repeat(60));
-        
+
         // A records (IPv4)
         match resolver.ipv4_lookup(domain).await {
             Ok(response) => {
@@ -76,19 +76,19 @@ pub fn dns_lookup(domain: &str) {
                     Cell::new("Type").fg(Color::Cyan),
                     Cell::new("Address").fg(Color::Cyan),
                 ]);
-                
+
                 for ip in response.iter() {
                     table.add_row(vec![
                         Cell::new("A"),
                         Cell::new(ip.to_string()).fg(Color::Green),
                     ]);
                 }
-                
+
                 println!("{}", table);
             }
             Err(_) => println!("{} No A (IPv4) records found", "!".yellow()),
         }
-        
+
         // AAAA records (IPv6)
         match resolver.ipv6_lookup(domain).await {
             Ok(response) => {
@@ -98,19 +98,19 @@ pub fn dns_lookup(domain: &str) {
                     Cell::new("Type").fg(Color::Cyan),
                     Cell::new("Address").fg(Color::Cyan),
                 ]);
-                
+
                 for ip in response.iter() {
                     table.add_row(vec![
                         Cell::new("AAAA"),
                         Cell::new(ip.to_string()).fg(Color::Green),
                     ]);
                 }
-                
+
                 println!("{}", table);
             }
             Err(_) => println!("{} No AAAA (IPv6) records found", "!".yellow()),
         }
-        
+
         // MX records
         match resolver.mx_lookup(domain).await {
             Ok(response) => {
@@ -121,7 +121,7 @@ pub fn dns_lookup(domain: &str) {
                     Cell::new("Priority").fg(Color::Cyan),
                     Cell::new("Mail Server").fg(Color::Cyan),
                 ]);
-                
+
                 for mx in response.iter() {
                     table.add_row(vec![
                         Cell::new("MX"),
@@ -129,12 +129,12 @@ pub fn dns_lookup(domain: &str) {
                         Cell::new(mx.exchange().to_string()).fg(Color::Green),
                     ]);
                 }
-                
+
                 println!("{}", table);
             }
             Err(_) => println!("{} No MX (mail) records found", "!".yellow()),
         }
-        
+
         println!();
     });
 }
@@ -148,7 +148,7 @@ pub fn reverse_dns(ip_str: &str) {
             return;
         }
     };
-    
+
     // Create a Tokio runtime for async DNS resolution
     let rt = match tokio::runtime::Runtime::new() {
         Ok(r) => r,
@@ -157,7 +157,7 @@ pub fn reverse_dns(ip_str: &str) {
             return;
         }
     };
-    
+
     rt.block_on(async {
         // Create resolver with system config
         let resolver = match TokioAsyncResolver::tokio_from_system_conf() {
@@ -167,10 +167,10 @@ pub fn reverse_dns(ip_str: &str) {
                 return;
             }
         };
-        
+
         println!("\n{} {}", "Reverse DNS:".cyan().bold(), ip);
         println!("{}", "=".repeat(60));
-        
+
         // Perform reverse lookup
         match resolver.reverse_lookup(ip).await {
             Ok(response) => {
@@ -182,7 +182,7 @@ pub fn reverse_dns(ip_str: &str) {
                 eprintln!("{} No PTR records found: {}", "!".yellow(), e);
             }
         }
-        
+
         println!();
     });
 }
@@ -190,18 +190,18 @@ pub fn reverse_dns(ip_str: &str) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_port_validation() {
         // Test that port numbers are valid u16
         let valid_port: u16 = 80;
         assert!(valid_port > 0);
-        
+
         // Test max port
         let max_port: u16 = 65535;
         assert_eq!(max_port, u16::MAX);
     }
-    
+
     #[test]
     fn test_address_formatting() {
         // Test address string formatting
@@ -210,7 +210,7 @@ mod tests {
         let addr = format!("{}:{}", host, port);
         assert_eq!(addr, "localhost:8080");
     }
-    
+
     #[test]
     fn test_localhost_resolution() {
         // Test that localhost resolves
@@ -223,19 +223,17 @@ mod tests {
 pub fn whois(domain: &str) {
     println!("\n{} {}", "WHOIS Lookup:".cyan().bold(), domain);
     println!("{}", "=".repeat(60));
-    
+
     // Check if whois command is available
     if which::which("whois").is_err() {
         eprintln!("{} whois command not found", "✗".red());
         eprintln!("  Install: apt install whois / brew install whois");
         return;
     }
-    
+
     // Execute whois command
-    let output = std::process::Command::new("whois")
-        .arg(domain)
-        .output();
-    
+    let output = std::process::Command::new("whois").arg(domain).output();
+
     match output {
         Ok(result) => {
             if result.status.success() {
@@ -253,9 +251,14 @@ pub fn whois(domain: &str) {
 }
 
 pub fn trace(host: &str, max_hops: u32) {
-    println!("\n{} {} (max {} hops)", "Traceroute:".cyan().bold(), host, max_hops);
+    println!(
+        "\n{} {} (max {} hops)",
+        "Traceroute:".cyan().bold(),
+        host,
+        max_hops
+    );
     println!("{}", "=".repeat(60));
-    
+
     // Determine the traceroute command based on OS
     let max_hops_str = max_hops.to_string();
     let (cmd, args) = if cfg!(windows) {
@@ -263,7 +266,7 @@ pub fn trace(host: &str, max_hops: u32) {
     } else {
         ("traceroute", vec!["-m", max_hops_str.as_str(), host])
     };
-    
+
     // Check if command is available
     if which::which(cmd).is_err() {
         eprintln!("{} {} command not found", "✗".red(), cmd);
@@ -272,12 +275,10 @@ pub fn trace(host: &str, max_hops: u32) {
         }
         return;
     }
-    
+
     // Execute traceroute
-    let output = std::process::Command::new(cmd)
-        .args(&args)
-        .output();
-    
+    let output = std::process::Command::new(cmd).args(&args).output();
+
     match output {
         Ok(result) => {
             if result.status.success() {
@@ -297,7 +298,7 @@ pub fn trace(host: &str, max_hops: u32) {
 pub fn ping(host: &str, count: u32) {
     println!("\n{} {} ({} packets)", "Ping:".cyan().bold(), host, count);
     println!("{}", "=".repeat(60));
-    
+
     // Determine ping command based on OS
     let count_str = count.to_string();
     let (cmd, args) = if cfg!(windows) {
@@ -305,12 +306,10 @@ pub fn ping(host: &str, count: u32) {
     } else {
         ("ping", vec!["-c", count_str.as_str(), host])
     };
-    
+
     // Execute ping
-    let output = std::process::Command::new(cmd)
-        .args(&args)
-        .output();
-    
+    let output = std::process::Command::new(cmd).args(&args).output();
+
     match output {
         Ok(result) => {
             if result.status.success() {
@@ -326,4 +325,3 @@ pub fn ping(host: &str, count: u32) {
         }
     }
 }
-

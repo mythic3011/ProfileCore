@@ -1,5 +1,5 @@
 //! Generate shell-specific initialization code
-//! 
+//!
 //! Similar to Starship's approach - minimal shell wrappers that call the binary
 
 pub fn generate(shell: &str) {
@@ -16,7 +16,8 @@ pub fn generate(shell: &str) {
 }
 
 fn print_bash_init() {
-    println!(r#"# ProfileCore v1.0.0 - Bash Integration
+    println!(
+        r#"# ProfileCore v1.0.0 - Bash Integration
 
 # System Info
 alias sysinfo='profilecore system info'
@@ -50,11 +51,13 @@ pkginstall() {{
 if command -v profilecore &> /dev/null; then
     eval "$(profilecore completions bash)"
 fi
-"#);
+"#
+    );
 }
 
 fn print_zsh_init() {
-    println!(r#"# ProfileCore v1.0.0 - Zsh Integration
+    println!(
+        r#"# ProfileCore v1.0.0 - Zsh Integration
 
 # System Info
 alias sysinfo='profilecore system info'
@@ -88,11 +91,13 @@ pkginstall() {{
 if command -v profilecore &> /dev/null; then
     eval "$(profilecore completions zsh)"
 fi
-"#);
+"#
+    );
 }
 
 fn print_fish_init() {
-    println!(r#"# ProfileCore v1.0.0 - Fish Integration
+    println!(
+        r#"# ProfileCore v1.0.0 - Fish Integration
 
 # System Info
 alias sysinfo='profilecore system info'
@@ -130,11 +135,13 @@ end
 if command -v profilecore > /dev/null
     profilecore completions fish | source
 end
-"#);
+"#
+    );
 }
 
 fn print_powershell_init() {
-    println!(r#"# ProfileCore v1.0.0 - PowerShell Integration
+    println!(
+        r#"# ProfileCore v1.0.0 - PowerShell Integration
 
 # System Info
 function sysinfo {{ profilecore system info }}
@@ -164,6 +171,6 @@ if (Get-Command profilecore -ErrorAction SilentlyContinue) {{
 }}
 
 Write-Host "ProfileCore v1.0.0 loaded" -ForegroundColor Green
-"#);
+"#
+    );
 }
-

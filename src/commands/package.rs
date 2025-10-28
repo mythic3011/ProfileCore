@@ -71,7 +71,7 @@ fn detect_and_run(operation: &str, target: Option<&str>) {
             eprintln!("{} No package manager found (winget/choco)", "✗".red());
         }
     }
-    
+
     #[cfg(target_os = "macos")]
     {
         if which("brew").is_ok() {
@@ -89,7 +89,7 @@ fn detect_and_run(operation: &str, target: Option<&str>) {
             eprintln!("{} Homebrew not found", "✗".red());
         }
     }
-    
+
     #[cfg(target_os = "linux")]
     {
         if which("apt-get").is_ok() {
@@ -98,7 +98,10 @@ fn detect_and_run(operation: &str, target: Option<&str>) {
                 "list" => run_command("apt", &["list", "--installed"]),
                 "search" => run_command("apt-cache", &["search", target.unwrap()]),
                 "update" => run_command("sudo", &["apt-get", "update"]),
-                "upgrade" => run_command("sudo", &["apt-get", "install", "--only-upgrade", target.unwrap()]),
+                "upgrade" => run_command(
+                    "sudo",
+                    &["apt-get", "install", "--only-upgrade", target.unwrap()],
+                ),
                 "remove" => run_command("sudo", &["apt-get", "remove", "-y", target.unwrap()]),
                 "info" => run_command("apt-cache", &["show", target.unwrap()]),
                 _ => eprintln!("{} Unknown operation", "✗".red()),
@@ -137,14 +140,17 @@ fn run_command(cmd: &str, args: &[&str]) {
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .status();
-    
+
     match output {
         Ok(status) => {
             if !status.success() {
-                eprintln!("\n{} Command failed with exit code: {:?}", "✗".red(), status.code());
+                eprintln!(
+                    "\n{} Command failed with exit code: {:?}",
+                    "✗".red(),
+                    status.code()
+                );
             }
         }
         Err(e) => eprintln!("{} Failed to run command: {}", "✗".red(), e),
     }
 }
-

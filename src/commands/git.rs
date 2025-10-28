@@ -1,10 +1,10 @@
 //! Git operations (using git2 library)
 
+use crate::config::{GitAccount, GitAccountsConfig};
 use colored::Colorize;
+use comfy_table::{presets::UTF8_FULL, Cell, Color, Table};
 use git2::Repository;
 use std::env;
-use comfy_table::{Table, presets::UTF8_FULL, Cell, Color};
-use crate::config::{GitAccountsConfig, GitAccount};
 
 pub fn status() {
     let current_dir = match env::current_dir() {
@@ -14,7 +14,7 @@ pub fn status() {
             return;
         }
     };
-    
+
     let repo = match Repository::discover(&current_dir) {
         Ok(r) => r,
         Err(e) => {
@@ -22,7 +22,7 @@ pub fn status() {
             return;
         }
     };
-    
+
     // Get current branch
     let head = match repo.head() {
         Ok(h) => h,
@@ -31,10 +31,10 @@ pub fn status() {
             return;
         }
     };
-    
+
     let branch_name = head.shorthand().unwrap_or("(detached)");
     println!("{} On branch: {}", "✓".green(), branch_name.cyan());
-    
+
     // Get status
     let statuses = match repo.statuses(None) {
         Ok(s) => s,
@@ -43,7 +43,7 @@ pub fn status() {
             return;
         }
     };
-    
+
     if statuses.is_empty() {
         println!("{} Working tree clean", "✓".green());
     } else {
@@ -51,7 +51,7 @@ pub fn status() {
         for entry in statuses.iter() {
             let status = entry.status();
             let path = entry.path().unwrap_or("?");
-            
+
             if status.is_index_new() || status.is_wt_new() {
                 println!("  {} {}", "+".green(), path);
             } else if status.is_index_modified() || status.is_wt_modified() {
@@ -72,7 +72,7 @@ pub fn switch_account(account_name: &str) {
             return;
         }
     };
-    
+
     // Find account
     let account = match config.find_account(account_name) {
         Some(a) => a,
@@ -82,7 +82,7 @@ pub fn switch_account(account_name: &str) {
             return;
         }
     };
-    
+
     // Get current repo
     let current_dir = match env::current_dir() {
         Ok(dir) => dir,
@@ -91,7 +91,7 @@ pub fn switch_account(account_name: &str) {
             return;
         }
     };
-    
+
     let repo = match Repository::discover(&current_dir) {
         Ok(r) => r,
         Err(e) => {
@@ -99,7 +99,7 @@ pub fn switch_account(account_name: &str) {
             return;
         }
     };
-    
+
     // Get repo config
     let mut git_config = match repo.config() {
         Ok(c) => c,
@@ -108,26 +108,30 @@ pub fn switch_account(account_name: &str) {
             return;
         }
     };
-    
+
     // Set user.name and user.email
     if let Err(e) = git_config.set_str("user.name", &account.name) {
         eprintln!("{} Failed to set user.name: {}", "✗".red(), e);
         return;
     }
-    
+
     if let Err(e) = git_config.set_str("user.email", &account.email) {
         eprintln!("{} Failed to set user.email: {}", "✗".red(), e);
         return;
     }
-    
+
     // Optionally set signing key
     if let Some(ref key) = account.signing_key {
         if let Err(e) = git_config.set_str("user.signingkey", key) {
             eprintln!("{} Warning: Failed to set signing key: {}", "!".yellow(), e);
         }
     }
-    
-    println!("{} Switched to account: {}", "✓".green(), account_name.cyan());
+
+    println!(
+        "{} Switched to account: {}",
+        "✓".green(),
+        account_name.cyan()
+    );
     println!("  Name:  {}", account.name);
     println!("  Email: {}", account.email);
     if let Some(ref key) = account.signing_key {
@@ -143,13 +147,13 @@ pub fn add_account(name: String, email: String, signing_key: Option<String>) {
             return;
         }
     };
-    
+
     let account = GitAccount {
         name: name.clone(),
         email: email.clone(),
         signing_key,
     };
-    
+
     match config.add_account(account) {
         Ok(_) => {
             println!("{} Added account: {}", "✓".green(), name.cyan());
@@ -170,13 +174,13 @@ pub fn list_accounts() {
             return;
         }
     };
-    
+
     if config.accounts.is_empty() {
         println!("{} No accounts configured", "!".yellow());
         println!("  Add one: profilecore git add-account <name> <email>");
         return;
     }
-    
+
     // Get current git user (if in a repo)
     let current_email = if let Ok(dir) = env::current_dir() {
         if let Ok(repo) = Repository::discover(&dir) {
@@ -191,10 +195,10 @@ pub fn list_accounts() {
     } else {
         None
     };
-    
+
     println!("\n{}", "Git Accounts".cyan().bold());
     println!("{}", "=".repeat(60));
-    
+
     let mut table = Table::new();
     table.load_preset(UTF8_FULL);
     table.set_header(vec![
@@ -203,19 +207,23 @@ pub fn list_accounts() {
         Cell::new("Signing Key").fg(Color::Cyan),
         Cell::new("Active").fg(Color::Cyan),
     ]);
-    
+
     for account in &config.accounts {
         let is_active = current_email.as_deref() == Some(&account.email);
         let active_marker = if is_active { "✓" } else { "" };
-        
+
         table.add_row(vec![
             Cell::new(&account.name),
             Cell::new(&account.email),
             Cell::new(account.signing_key.as_deref().unwrap_or("-")),
-            Cell::new(active_marker).fg(if is_active { Color::Green } else { Color::Reset }),
+            Cell::new(active_marker).fg(if is_active {
+                Color::Green
+            } else {
+                Color::Reset
+            }),
         ]);
     }
-    
+
     println!("{}\n", table);
 }
 
@@ -227,7 +235,7 @@ pub fn whoami() {
             return;
         }
     };
-    
+
     let repo = match Repository::discover(&current_dir) {
         Ok(r) => r,
         Err(e) => {
@@ -235,7 +243,7 @@ pub fn whoami() {
             return;
         }
     };
-    
+
     let git_config = match repo.config() {
         Ok(c) => c,
         Err(e) => {
@@ -243,11 +251,15 @@ pub fn whoami() {
             return;
         }
     };
-    
-    let name = git_config.get_string("user.name").unwrap_or_else(|_| "(not set)".to_string());
-    let email = git_config.get_string("user.email").unwrap_or_else(|_| "(not set)".to_string());
+
+    let name = git_config
+        .get_string("user.name")
+        .unwrap_or_else(|_| "(not set)".to_string());
+    let email = git_config
+        .get_string("user.email")
+        .unwrap_or_else(|_| "(not set)".to_string());
     let signing_key = git_config.get_string("user.signingkey").ok();
-    
+
     println!("\n{}", "Current Git Identity".cyan().bold());
     println!("{}", "=".repeat(60));
     println!("  Name:  {}", name);
@@ -266,7 +278,7 @@ pub fn log(limit: usize) {
             return;
         }
     };
-    
+
     let repo = match Repository::discover(&current_dir) {
         Ok(r) => r,
         Err(e) => {
@@ -274,7 +286,7 @@ pub fn log(limit: usize) {
             return;
         }
     };
-    
+
     // Get HEAD
     let mut revwalk = match repo.revwalk() {
         Ok(r) => r,
@@ -283,21 +295,21 @@ pub fn log(limit: usize) {
             return;
         }
     };
-    
+
     if let Err(e) = revwalk.push_head() {
         eprintln!("{} Failed to push HEAD: {}", "✗".red(), e);
         return;
     }
-    
+
     println!("\n{}", "Git Log".cyan().bold());
     println!("{}", "=".repeat(80));
-    
+
     let mut count = 0;
     for (index, oid) in revwalk.enumerate() {
         if index >= limit {
             break;
         }
-        
+
         let oid = match oid {
             Ok(o) => o,
             Err(e) => {
@@ -305,7 +317,7 @@ pub fn log(limit: usize) {
                 continue;
             }
         };
-        
+
         let commit = match repo.find_commit(oid) {
             Ok(c) => c,
             Err(e) => {
@@ -313,29 +325,38 @@ pub fn log(limit: usize) {
                 continue;
             }
         };
-        
+
         let short_id = &oid.to_string()[..7];
-        let message = commit.message().unwrap_or("(no message)").lines().next().unwrap_or("");
+        let message = commit
+            .message()
+            .unwrap_or("(no message)")
+            .lines()
+            .next()
+            .unwrap_or("");
         let author = commit.author();
         let time = commit.time();
-        
+
         // Convert timestamp to readable format
         let datetime = chrono::DateTime::from_timestamp(time.seconds(), 0)
             .unwrap_or_else(|| chrono::DateTime::from_timestamp(0, 0).unwrap());
         let formatted_time = datetime.format("%Y-%m-%d %H:%M:%S").to_string();
-        
+
         println!("\n{} {}", "commit".yellow(), short_id.cyan());
-        println!("Author: {} <{}>", author.name().unwrap_or("?"), author.email().unwrap_or("?"));
+        println!(
+            "Author: {} <{}>",
+            author.name().unwrap_or("?"),
+            author.email().unwrap_or("?")
+        );
         println!("Date:   {}", formatted_time);
         println!("\n    {}", message);
-        
+
         count += 1;
     }
-    
+
     if count == 0 {
         println!("{} No commits found", "!".yellow());
     }
-    
+
     println!();
 }
 
@@ -347,7 +368,7 @@ pub fn diff() {
             return;
         }
     };
-    
+
     let repo = match Repository::discover(&current_dir) {
         Ok(r) => r,
         Err(e) => {
@@ -355,21 +376,21 @@ pub fn diff() {
             return;
         }
     };
-    
+
     println!("\n{}", "Git Diff (Working Tree Changes)".cyan().bold());
     println!("{}", "=".repeat(80));
-    
+
     // Get the diff between HEAD and working directory
     let head_tree = match repo.head() {
         Ok(head) => head.peel_to_tree().ok(),
         Err(_) => None,
     };
-    
+
     let diff = match head_tree {
         Some(tree) => repo.diff_tree_to_workdir_with_index(Some(&tree), None),
         None => repo.diff_tree_to_workdir_with_index(None, None),
     };
-    
+
     let diff = match diff {
         Ok(d) => d,
         Err(e) => {
@@ -377,7 +398,7 @@ pub fn diff() {
             return;
         }
     };
-    
+
     let stats = match diff.stats() {
         Ok(s) => s,
         Err(e) => {
@@ -385,31 +406,33 @@ pub fn diff() {
             return;
         }
     };
-    
+
     if stats.files_changed() == 0 {
         println!("{} No changes", "✓".green());
     } else {
-        println!("\n{} {} file(s) changed, {} insertion(s)(+), {} deletion(s)(-)",
+        println!(
+            "\n{} {} file(s) changed, {} insertion(s)(+), {} deletion(s)(-)",
             "📊",
             stats.files_changed(),
             stats.insertions(),
             stats.deletions()
         );
-        
+
         // Print file-by-file stats
         diff.print(git2::DiffFormat::NameStatus, |_delta, _hunk, line| {
             let origin = line.origin();
             let content = String::from_utf8_lossy(line.content());
-            
+
             match origin {
                 '+' => print!("{}", format!("+ {}", content).green()),
                 '-' => print!("{}", format!("- {}", content).red()),
                 _ => print!("{}", content),
             }
             true
-        }).ok();
+        })
+        .ok();
     }
-    
+
     println!();
 }
 
@@ -421,7 +444,7 @@ pub fn branch(list_all: bool) {
             return;
         }
     };
-    
+
     let repo = match Repository::discover(&current_dir) {
         Ok(r) => r,
         Err(e) => {
@@ -429,18 +452,18 @@ pub fn branch(list_all: bool) {
             return;
         }
     };
-    
+
     println!("\n{}", "Git Branches".cyan().bold());
     println!("{}", "=".repeat(60));
-    
+
     let branch_type = if list_all {
-        None  // All branches (local and remote)
+        None // All branches (local and remote)
     } else {
-        Some(git2::BranchType::Local)  // Just local branches
+        Some(git2::BranchType::Local) // Just local branches
     };
-    
+
     let branches = repo.branches(branch_type).ok();
-    
+
     let branches = match branches {
         Some(b) => b,
         None => {
@@ -448,11 +471,11 @@ pub fn branch(list_all: bool) {
             return;
         }
     };
-    
+
     // Get current branch
     let head = repo.head().ok();
     let current_branch = head.and_then(|h| h.shorthand().map(|s| s.to_string()));
-    
+
     let mut count = 0;
     for branch_result in branches {
         let (branch, _branch_type) = match branch_result {
@@ -462,28 +485,28 @@ pub fn branch(list_all: bool) {
                 continue;
             }
         };
-        
+
         let name = match branch.name() {
             Ok(Some(n)) => n,
             Ok(None) => "(unnamed)",
             Err(_) => "(error)",
         };
-        
+
         let is_current = current_branch.as_deref() == Some(name);
-        
+
         if is_current {
             println!("  {} {}", "*".green().bold(), name.green().bold());
         } else {
             println!("    {}", name);
         }
-        
+
         count += 1;
     }
-    
+
     if count == 0 {
         println!("{} No branches found", "!".yellow());
     }
-    
+
     println!();
 }
 
@@ -495,7 +518,7 @@ pub fn remote() {
             return;
         }
     };
-    
+
     let repo = match Repository::discover(&current_dir) {
         Ok(r) => r,
         Err(e) => {
@@ -503,10 +526,10 @@ pub fn remote() {
             return;
         }
     };
-    
+
     println!("\n{}", "Git Remotes".cyan().bold());
     println!("{}", "=".repeat(60));
-    
+
     let remotes = match repo.remotes() {
         Ok(r) => r,
         Err(e) => {
@@ -514,56 +537,55 @@ pub fn remote() {
             return;
         }
     };
-    
+
     if remotes.is_empty() {
         println!("{} No remotes configured", "!".yellow());
         println!();
         return;
     }
-    
+
     let mut table = Table::new();
     table.load_preset(UTF8_FULL);
     table.set_header(vec![
         Cell::new("Name").fg(Color::Cyan),
         Cell::new("URL").fg(Color::Cyan),
     ]);
-    
+
     for remote_name in remotes.iter() {
         let remote_name = match remote_name {
             Some(n) => n,
             None => continue,
         };
-        
+
         let remote = match repo.find_remote(remote_name) {
             Ok(r) => r,
             Err(_) => continue,
         };
-        
+
         let url = remote.url().unwrap_or("(no URL)");
-        
-        table.add_row(vec![
-            Cell::new(remote_name),
-            Cell::new(url),
-        ]);
+
+        table.add_row(vec![Cell::new(remote_name), Cell::new(url)]);
     }
-    
+
     println!("{}\n", table);
 }
 
 pub fn clone(url: &str, path: Option<&str>) {
     println!("\n{} {}", "Cloning repository:".cyan().bold(), url.yellow());
     println!("{}", "=".repeat(60));
-    
+
     let repo_result = if let Some(target_path) = path {
         git2::Repository::clone(url, target_path)
     } else {
         // Extract repo name from URL
-        let repo_name = url.rsplit('/').next()
+        let repo_name = url
+            .rsplit('/')
+            .next()
             .unwrap_or("repo")
             .trim_end_matches(".git");
         git2::Repository::clone(url, repo_name)
     };
-    
+
     match repo_result {
         Ok(repo) => {
             let path = repo.path().parent().unwrap_or(repo.path());
@@ -574,7 +596,7 @@ pub fn clone(url: &str, path: Option<&str>) {
             eprintln!("{} Clone failed: {}", "✗".red(), e);
         }
     }
-    
+
     println!();
 }
 
@@ -586,7 +608,7 @@ pub fn pull() {
             return;
         }
     };
-    
+
     let repo = match git2::Repository::open(&current_dir) {
         Ok(r) => r,
         Err(e) => {
@@ -594,10 +616,10 @@ pub fn pull() {
             return;
         }
     };
-    
+
     println!("\n{}", "Pulling from remote...".cyan().bold());
     println!("{}", "=".repeat(60));
-    
+
     // Get current branch
     let head = match repo.head() {
         Ok(h) => h,
@@ -606,7 +628,7 @@ pub fn pull() {
             return;
         }
     };
-    
+
     let branch_name = match head.shorthand() {
         Some(name) => name,
         None => {
@@ -614,14 +636,11 @@ pub fn pull() {
             return;
         }
     };
-    
+
     println!("Branch: {}", branch_name.cyan());
-    
+
     // For simplicity, we'll call git pull via command
-    match std::process::Command::new("git")
-        .args(["pull"])
-        .status()
-    {
+    match std::process::Command::new("git").args(["pull"]).status() {
         Ok(status) => {
             if status.success() {
                 println!("{} Pull completed successfully", "✓".green());
@@ -633,7 +652,7 @@ pub fn pull() {
             eprintln!("{} Failed to execute git pull: {}", "✗".red(), e);
         }
     }
-    
+
     println!();
 }
 
@@ -645,7 +664,7 @@ pub fn push(remote: Option<&str>, branch: Option<&str>) {
             return;
         }
     };
-    
+
     let repo = match git2::Repository::open(&current_dir) {
         Ok(r) => r,
         Err(e) => {
@@ -653,36 +672,34 @@ pub fn push(remote: Option<&str>, branch: Option<&str>) {
             return;
         }
     };
-    
+
     println!("\n{}", "Pushing to remote...".cyan().bold());
     println!("{}", "=".repeat(60));
-    
+
     let remote_name = remote.unwrap_or("origin");
-    
+
     // Get current branch if not specified
     let branch_name = if let Some(b) = branch {
         b.to_string()
     } else {
         match repo.head() {
-            Ok(head) => {
-                match head.shorthand() {
-                    Some(name) => name.to_string(),
-                    None => {
-                        eprintln!("{} Could not determine branch name", "✗".red());
-                        return;
-                    }
+            Ok(head) => match head.shorthand() {
+                Some(name) => name.to_string(),
+                None => {
+                    eprintln!("{} Could not determine branch name", "✗".red());
+                    return;
                 }
-            }
+            },
             Err(e) => {
                 eprintln!("{} Failed to get HEAD: {}", "✗".red(), e);
                 return;
             }
         }
     };
-    
+
     println!("Remote: {}", remote_name.cyan());
     println!("Branch: {}", branch_name.cyan());
-    
+
     // Use command line git for push (auth is complex with git2)
     match std::process::Command::new("git")
         .args(["push", remote_name, &branch_name])
@@ -699,14 +716,14 @@ pub fn push(remote: Option<&str>, branch: Option<&str>) {
             eprintln!("{} Failed to execute git push: {}", "✗".red(), e);
         }
     }
-    
+
     println!();
 }
 
 pub fn stash(action: &str) {
     println!("\n{} {}", "Git stash:".cyan().bold(), action.yellow());
     println!("{}", "=".repeat(60));
-    
+
     let args = match action {
         "save" | "push" => vec!["stash", "push"],
         "pop" => vec!["stash", "pop"],
@@ -718,11 +735,8 @@ pub fn stash(action: &str) {
             return;
         }
     };
-    
-    match std::process::Command::new("git")
-        .args(&args)
-        .status()
-    {
+
+    match std::process::Command::new("git").args(&args).status() {
         Ok(status) => {
             if status.success() {
                 println!("{} Stash {} completed", "✓".green(), action);
@@ -734,7 +748,7 @@ pub fn stash(action: &str) {
             eprintln!("{} Failed to execute git stash: {}", "✗".red(), e);
         }
     }
-    
+
     println!();
 }
 
@@ -746,7 +760,7 @@ pub fn commit(message: &str, all: bool) {
             return;
         }
     };
-    
+
     // Verify we're in a git repository
     let _repo = match git2::Repository::open(&current_dir) {
         Ok(r) => r,
@@ -755,10 +769,10 @@ pub fn commit(message: &str, all: bool) {
             return;
         }
     };
-    
+
     println!("\n{}", "Creating commit...".cyan().bold());
     println!("{}", "=".repeat(60));
-    
+
     // If --all flag, stage all changes first
     if all {
         println!("Staging all changes...");
@@ -778,7 +792,7 @@ pub fn commit(message: &str, all: bool) {
             }
         }
     }
-    
+
     // Use command line git for commit (simpler for handling index)
     match std::process::Command::new("git")
         .args(["commit", "-m", message])
@@ -796,7 +810,7 @@ pub fn commit(message: &str, all: bool) {
             eprintln!("{} Failed to execute git commit: {}", "✗".red(), e);
         }
     }
-    
+
     println!();
 }
 
@@ -804,7 +818,7 @@ pub fn tag(name: &str, message: Option<&str>, list: bool) {
     if list {
         println!("\n{}", "Git Tags".cyan().bold());
         println!("{}", "=".repeat(60));
-        
+
         match std::process::Command::new("git")
             .args(["tag", "-l"])
             .output()
@@ -828,12 +842,12 @@ pub fn tag(name: &str, message: Option<&str>, list: bool) {
         println!();
         return;
     }
-    
+
     println!("\n{} {}", "Creating tag:".cyan().bold(), name.yellow());
     println!("{}", "=".repeat(60));
-    
+
     let mut args = vec!["tag"];
-    
+
     if let Some(msg) = message {
         args.push("-a");
         args.push(name);
@@ -842,11 +856,8 @@ pub fn tag(name: &str, message: Option<&str>, list: bool) {
     } else {
         args.push(name);
     }
-    
-    match std::process::Command::new("git")
-        .args(&args)
-        .status()
-    {
+
+    match std::process::Command::new("git").args(&args).status() {
         Ok(status) => {
             if status.success() {
                 println!("{} Tag created successfully", "✓".green());
@@ -863,26 +874,23 @@ pub fn tag(name: &str, message: Option<&str>, list: bool) {
             eprintln!("{} Failed to execute git tag: {}", "✗".red(), e);
         }
     }
-    
+
     println!();
 }
 
 pub fn rebase(branch: &str, interactive: bool) {
     println!("\n{} {}", "Rebasing onto:".cyan().bold(), branch.yellow());
     println!("{}", "=".repeat(60));
-    
+
     let mut args = vec!["rebase"];
-    
+
     if interactive {
         args.push("-i");
     }
-    
+
     args.push(branch);
-    
-    match std::process::Command::new("git")
-        .args(&args)
-        .status()
-    {
+
+    match std::process::Command::new("git").args(&args).status() {
         Ok(status) => {
             if status.success() {
                 println!("{} Rebase completed successfully", "✓".green());
@@ -895,7 +903,6 @@ pub fn rebase(branch: &str, interactive: bool) {
             eprintln!("{} Failed to execute git rebase: {}", "✗".red(), e);
         }
     }
-    
+
     println!();
 }
-
