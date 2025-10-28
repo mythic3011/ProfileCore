@@ -13,7 +13,7 @@ pub fn list(limit: usize) {
     println!("{}", "=".repeat(80));
     
     let mut processes: Vec<_> = sys.processes().values().collect();
-    processes.sort_by(|a, b| b.memory().cmp(&a.memory()));
+    processes.sort_by_key(|b| std::cmp::Reverse(b.memory()));
     
     let mut table = Table::new();
     table.load_preset(UTF8_FULL);

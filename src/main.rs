@@ -80,6 +80,12 @@ enum Command {
     #[options(help = "utility commands (calc, random, time, config)")]
     Utils(UtilsOpts),
     
+    #[options(help = "install ProfileCore to your shell (interactive)")]
+    Install(InstallOpts),
+    
+    #[options(help = "uninstall ProfileCore from your shell")]
+    Uninstall(UninstallOpts2),
+    
     #[options(help = "uninstall legacy v6.0.0 PowerShell modules")]
     UninstallLegacy(UninstallOpts),
 }
@@ -672,7 +678,7 @@ struct PackageOpts {
 #[derive(Options)]
 enum PackageCmd {
     #[options(help = "install package")]
-    Install(InstallOpts),
+    Install(PackageInstallOpts),
     
     #[options(help = "list installed packages")]
     List(ListOpts),
@@ -694,7 +700,7 @@ enum PackageCmd {
 }
 
 #[derive(Options)]
-struct InstallOpts {
+struct PackageInstallOpts {
     #[options(help = "show help")]
     help: bool,
     
@@ -1411,6 +1417,18 @@ struct ConfigListOpts {
 }
 
 #[derive(Options)]
+struct InstallOpts {
+    #[options(help = "show help")]
+    help: bool,
+}
+
+#[derive(Options)]
+struct UninstallOpts2 {
+    #[options(help = "show help")]
+    help: bool,
+}
+
+#[derive(Options)]
 struct UninstallOpts {
     #[options(help = "show help")]
     help: bool,
@@ -2031,6 +2049,30 @@ fn main() {
             }
         }
         
+        Command::Install(opts) => {
+            if opts.help {
+                println!("Usage: profilecore install");
+                println!("Interactive installer for ProfileCore");
+                println!();
+                println!("This will:");
+                println!("  - Detect your shell");
+                println!("  - Add ProfileCore init code to your shell profile");
+                println!("  - Create configuration directories");
+                println!("  - Verify the installation");
+                return;
+            }
+            commands::install::run_installer();
+        }
+        
+        Command::Uninstall(opts) => {
+            if opts.help {
+                println!("Usage: profilecore uninstall");
+                println!("Uninstall ProfileCore from your shell");
+                return;
+            }
+            commands::install::run_uninstaller();
+        }
+        
         Command::UninstallLegacy(_) => {
             commands::uninstall::uninstall_legacy();
         }
@@ -2044,6 +2086,8 @@ fn print_help() {
     println!("    profilecore <COMMAND>");
     println!();
     println!("COMMANDS:");
+    println!("    install             Install ProfileCore to your shell (interactive)");
+    println!("    uninstall           Uninstall ProfileCore from your shell");
     println!("    init                Generate shell initialization code");
     println!("    completions         Generate shell completions");
     println!("    system              System information");
@@ -2065,6 +2109,7 @@ fn print_help() {
     println!("    uninstall-legacy    Remove v6.0.0 PowerShell modules");
     println!();
     println!("EXAMPLES:");
+    println!("    profilecore install            # Interactive installation wizard");
     println!("    profilecore init bash          # Generate bash init code");
     println!("    profilecore system info        # Show system info");
     println!("    profilecore network public-ip  # Get public IP");

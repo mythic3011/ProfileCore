@@ -40,12 +40,9 @@ pub fn ssl_check(domain: &str) {
     }
     
     // Create TLS config
-    let config = match ClientConfig::builder()
+    let config = ClientConfig::builder()
         .with_root_certificates(root_store)
-        .with_no_client_auth()
-    {
-        config => config,
-    };
+        .with_no_client_auth();
     
     // Connect
     let server_name = match rustls::pki_types::ServerName::try_from(host.to_string()) {
@@ -169,7 +166,7 @@ pub fn hash_password(password: &str, algorithm: &str) {
                 Ok(hash) => {
                     println!("{} Hash generated successfully", "✓".green());
                     println!("  Algorithm: {}", "Argon2id".cyan());
-                    println!("  Hash: {}", hash.to_string());
+                    println!("  Hash: {}", hash);
                     
                     // Verify
                     let hash_string = hash.to_string();

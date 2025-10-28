@@ -19,4 +19,5 @@ pub mod http;
 pub mod data;
 pub mod shell;
 pub mod utils;
+pub mod install;
 

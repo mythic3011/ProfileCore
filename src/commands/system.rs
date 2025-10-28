@@ -108,7 +108,7 @@ pub fn processes(limit: usize) {
     println!("{}", "=".repeat(80));
     
     let mut processes: Vec<_> = sys.processes().values().collect();
-    processes.sort_by(|a, b| b.memory().cmp(&a.memory()));
+    processes.sort_by_key(|b| std::cmp::Reverse(b.memory()));
     
     let mut table = Table::new();
     table.load_preset(UTF8_FULL);
@@ -390,7 +390,7 @@ pub fn users() {
     {
         use std::process::Command;
         match Command::new("getent")
-            .args(&["passwd"])
+            .args(["passwd"])
             .output()
         {
             Ok(output) => {
@@ -446,7 +446,7 @@ pub fn service_list() {
         use std::process::Command;
         // Try systemctl first
         match Command::new("systemctl")
-            .args(&["list-units", "--type=service", "--all", "--no-pager"])
+            .args(["list-units", "--type=service", "--all", "--no-pager"])
             .output()
         {
             Ok(output) => {
@@ -456,7 +456,7 @@ pub fn service_list() {
                 } else {
                     println!("{} systemctl not available, trying service command", "!".yellow());
                     match Command::new("service")
-                        .args(&["--status-all"])
+                        .args(["--status-all"])
                         .output()
                     {
                         Ok(svc_output) => {
@@ -507,7 +507,7 @@ pub fn service_status(name: &str) {
     {
         use std::process::Command;
         match Command::new("systemctl")
-            .args(&["status", name, "--no-pager"])
+            .args(["status", name, "--no-pager"])
             .output()
         {
             Ok(output) => {

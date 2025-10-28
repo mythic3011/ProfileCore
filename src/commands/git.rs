@@ -361,10 +361,7 @@ pub fn diff() {
     
     // Get the diff between HEAD and working directory
     let head_tree = match repo.head() {
-        Ok(head) => match head.peel_to_tree() {
-            Ok(tree) => Some(tree),
-            Err(_) => None,
-        },
+        Ok(head) => head.peel_to_tree().ok(),
         Err(_) => None,
     };
     
@@ -393,7 +390,7 @@ pub fn diff() {
         println!("{} No changes", "✓".green());
     } else {
         println!("\n{} {} file(s) changed, {} insertion(s)(+), {} deletion(s)(-)",
-            "📊".to_string(),
+            "📊",
             stats.files_changed(),
             stats.insertions(),
             stats.deletions()
@@ -436,11 +433,13 @@ pub fn branch(list_all: bool) {
     println!("\n{}", "Git Branches".cyan().bold());
     println!("{}", "=".repeat(60));
     
-    let branches = if list_all {
-        repo.branches(Some(git2::BranchType::Local)).ok()
+    let branch_type = if list_all {
+        None  // All branches (local and remote)
     } else {
-        repo.branches(Some(git2::BranchType::Local)).ok()
+        Some(git2::BranchType::Local)  // Just local branches
     };
+    
+    let branches = repo.branches(branch_type).ok();
     
     let branches = match branches {
         Some(b) => b,
@@ -620,7 +619,7 @@ pub fn pull() {
     
     // For simplicity, we'll call git pull via command
     match std::process::Command::new("git")
-        .args(&["pull"])
+        .args(["pull"])
         .status()
     {
         Ok(status) => {
@@ -686,7 +685,7 @@ pub fn push(remote: Option<&str>, branch: Option<&str>) {
     
     // Use command line git for push (auth is complex with git2)
     match std::process::Command::new("git")
-        .args(&["push", remote_name, &branch_name])
+        .args(["push", remote_name, &branch_name])
         .status()
     {
         Ok(status) => {
@@ -764,7 +763,7 @@ pub fn commit(message: &str, all: bool) {
     if all {
         println!("Staging all changes...");
         match std::process::Command::new("git")
-            .args(&["add", "-A"])
+            .args(["add", "-A"])
             .status()
         {
             Ok(status) => {
@@ -782,7 +781,7 @@ pub fn commit(message: &str, all: bool) {
     
     // Use command line git for commit (simpler for handling index)
     match std::process::Command::new("git")
-        .args(&["commit", "-m", message])
+        .args(["commit", "-m", message])
         .status()
     {
         Ok(status) => {
@@ -807,7 +806,7 @@ pub fn tag(name: &str, message: Option<&str>, list: bool) {
         println!("{}", "=".repeat(60));
         
         match std::process::Command::new("git")
-            .args(&["tag", "-l"])
+            .args(["tag", "-l"])
             .output()
         {
             Ok(output) => {

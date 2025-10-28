@@ -80,7 +80,7 @@ pub fn dns_lookup(domain: &str) {
                 for ip in response.iter() {
                     table.add_row(vec![
                         Cell::new("A"),
-                        Cell::new(&ip.to_string()).fg(Color::Green),
+                        Cell::new(ip.to_string()).fg(Color::Green),
                     ]);
                 }
                 
@@ -102,7 +102,7 @@ pub fn dns_lookup(domain: &str) {
                 for ip in response.iter() {
                     table.add_row(vec![
                         Cell::new("AAAA"),
-                        Cell::new(&ip.to_string()).fg(Color::Green),
+                        Cell::new(ip.to_string()).fg(Color::Green),
                     ]);
                 }
                 
@@ -125,8 +125,8 @@ pub fn dns_lookup(domain: &str) {
                 for mx in response.iter() {
                     table.add_row(vec![
                         Cell::new("MX"),
-                        Cell::new(&mx.preference().to_string()),
-                        Cell::new(&mx.exchange().to_string()).fg(Color::Green),
+                        Cell::new(mx.preference().to_string()),
+                        Cell::new(mx.exchange().to_string()).fg(Color::Green),
                     ]);
                 }
                 
@@ -175,7 +175,7 @@ pub fn reverse_dns(ip_str: &str) {
         match resolver.reverse_lookup(ip).await {
             Ok(response) => {
                 for name in response.iter() {
-                    println!("{} {}", "✓".green(), name.to_string());
+                    println!("{} {}", "✓".green(), name);
                 }
             }
             Err(e) => {

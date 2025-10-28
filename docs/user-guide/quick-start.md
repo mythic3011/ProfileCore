@@ -1,6 +1,6 @@
 # ProfileCore Quick Start Guide 🚀
 
-**Get ProfileCore running in 5 minutes or less!**
+**Get ProfileCore v1.0.0 running in 3 minutes or less!**
 
 ---
 
@@ -20,110 +20,136 @@ irm https://raw.githubusercontent.com/mythic3011/ProfileCore/main/scripts/quick-
 curl -fsSL https://raw.githubusercontent.com/mythic3011/ProfileCore/main/scripts/quick-install.sh | bash
 ```
 
-**⏱️ Time:** 2-5 minutes | **📦 What it does:** Clones repo, installs, prompts for config
+**⏱️ Time:** 2-3 minutes | **📦 What it does:**
 
-### Alternative: Standard Installation
+- Downloads ProfileCore binary
+- Adds to PATH
+- Runs interactive installer
+- Configures your shell automatically
 
-```bash
-git clone https://github.com/mythic3011/ProfileCore.git
-cd ProfileCore
+### Alternative: Manual Installation
 
-# Windows
-.\scripts\installation\install.ps1
+1. Download binary for your platform from [Releases](https://github.com/mythic3011/ProfileCore/releases/tag/v1.0.0)
+2. Move to PATH directory
+3. Run: `profilecore install`
 
-# macOS/Linux
-chmod +x ./scripts/installation/install.sh
-./scripts/installation/install.sh
-```
-
-**📖 More options:** See [INSTALL.md](INSTALL.md) for advanced installation
+**📖 More options:** See [INSTALL.md](../../INSTALL.md) for detailed instructions
 
 ---
 
 ## ✅ 2. Verify Installation
 
-**Quick Test:**
+**Restart your shell or reload:**
 
 ```bash
 # PowerShell
 . $PROFILE
-Get-OperatingSystem
 
-# Unix (Zsh/Bash/Fish)
-source ~/.zshrc     # or ~/.bashrc
-get_os
+# Bash
+source ~/.bashrc
+
+# Zsh
+source ~/.zshrc
+
+# Fish
+source ~/.config/fish/config.fish
 ```
 
-**Validate Installation:**
+**Quick Test:**
 
 ```bash
-# PowerShell
-.\scripts\installation\install.ps1 -Validate
+# Check version
+profilecore --version
 
-# Unix
-./scripts/installation/install.sh --validate
+# Try a command
+profilecore system info
+sysinfo  # or use alias
 ```
 
 ---
 
 ## 🎯 3. Essential Commands
 
-### Core Functions
+ProfileCore v1.0.0 provides 97 commands across 17 categories. Here are some to get started:
 
-| Command          | PowerShell            | Unix       | Description    |
-| ---------------- | --------------------- | ---------- | -------------- |
-| **OS Info**      | `Get-OperatingSystem` | `get_os`   | Check your OS  |
-| **Public IP**    | `Get-PublicIP`        | `myip`     | Get public IP  |
-| **System Info**  | `Get-SystemInfo`      | `sysinfo`  | System details |
-| **Connectivity** | -                     | `netcheck` | Test internet  |
+### System Information
+
+```bash
+profilecore system info              # Comprehensive system info
+sysinfo                              # Alias
+
+profilecore system uptime            # System uptime
+profilecore system processes         # Top processes
+profilecore system disk-usage        # Disk usage
+```
+
+### Network Tools
+
+```bash
+profilecore network public-ip        # Get public IP
+publicip                             # Alias
+
+profilecore network test-port google.com 443
+profilecore network dns example.com
+profilecore network whois github.com
+```
+
+### Git Operations
+
+```bash
+profilecore git status               # Repository status
+gitstatus                            # Alias
+
+profilecore git log                  # Commit history
+profilecore git switch-account personal
+profilecore git add-account work user@work.com
+```
+
+### Security Tools
+
+```bash
+profilecore security ssl-check github.com
+profilecore security gen-password --length 20
+genpass 20                           # Alias
+
+profilecore security check-password "MyP@ssw0rd"
+```
+
+### Docker (if installed)
+
+```bash
+profilecore docker ps                # List containers
+dps                                  # Alias
+
+profilecore docker stats container-name
+profilecore docker logs container-name
+```
 
 ### Package Management
 
 ```bash
-pkgs python          # Search packages
-pkg neovim           # Install package
-pkgu                 # Update all
+profilecore package search python
+profilecore package install neovim
+profilecore package upgrade git
 ```
 
-### v4.0 Security Tools
-
-```bash
-scan-port google.com 443     # Port scanner
-check-ssl github.com         # SSL checker
-gen-password                 # Password generator
-dns-lookup example.com       # DNS info
-whois-lookup example.com     # WHOIS lookup
-```
-
-### v4.0 Developer Tools
-
-```bash
-quick-commit "feat: update"  # Quick Git commit
-docker-status                # Docker containers
-init-project my-app nodejs   # Project scaffolding
-```
-
-### v4.0 System Admin
-
-```bash
-sysinfo                      # System information
-top-processes                # Process monitor
-diskinfo                     # Disk usage
-```
+**See all commands:** `profilecore --help`
 
 ---
 
 ## ⚙️ 4. Configuration (Optional)
 
-### Quick Config
+ProfileCore v1.0.0 stores configuration in `~/.config/profilecore/`.
 
-```bash
-# PowerShell - Interactive wizard
-Initialize-ProfileCoreConfig
+### Configuration Files (Auto-created)
+
+- `~/.config/profilecore/` - Main config directory
 
 # Unix - Edit environment file
+
 nano ~/.config/shell-profile/.env
-```
+
+````
 
 ### Add API Keys
 
@@ -131,7 +157,7 @@ nano ~/.config/shell-profile/.env
 # Edit ~/.config/shell-profile/.env
 export GITHUB_TOKEN="your_token"
 export OPENAI_API_KEY="your_key"
-```
+````
 
 ### Config Files
 

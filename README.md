@@ -257,61 +257,46 @@ profilecore uninstall-legacy         # Remove v6.0.0 PowerShell modules
 
 ## 📥 Installation
 
-### Option A: Pre-built Binary (Recommended)
+### ⚡ Quick Install (Recommended)
 
-```bash
-# Download from GitHub Releases
-# https://github.com/mythic3011/ProfileCore/releases/tag/v1.0.0
-
-# Linux/macOS
-curl -sSL https://github.com/mythic3011/ProfileCore/releases/download/v1.0.0/profilecore-linux-x86_64 -o profilecore
-chmod +x profilecore
-sudo mv profilecore /usr/local/bin/
-
-# Windows (PowerShell)
-irm https://github.com/mythic3011/ProfileCore/releases/download/v1.0.0/profilecore-windows-x86_64.exe -OutFile profilecore.exe
-# Move to a directory in your PATH
-```
-
-### Option B: Build from Source
-
-```bash
-# Prerequisites: Rust 1.75+
-git clone https://github.com/mythic3011/ProfileCore
-cd ProfileCore
-cargo build --release
-
-# Binary at: target/release/profilecore
-# Add to PATH or copy to /usr/local/bin/ (Unix) or a directory in PATH (Windows)
-```
-
-### Shell Integration
-
-**Bash** (`~/.bashrc`):
-
-```bash
-eval "$(profilecore init bash)"
-```
-
-**Zsh** (`~/.zshrc`):
-
-```zsh
-eval "$(profilecore init zsh)"
-```
-
-**Fish** (`~/.config/fish/config.fish`):
-
-```fish
-profilecore init fish | source
-```
-
-**PowerShell** (`$PROFILE`):
+**Windows (PowerShell):**
 
 ```powershell
-profilecore init powershell | Invoke-Expression
+irm https://raw.githubusercontent.com/mythic3011/ProfileCore/main/scripts/quick-install.ps1 | iex
 ```
 
-**Restart your shell** to activate ProfileCore.
+**macOS / Linux:**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/mythic3011/ProfileCore/main/scripts/quick-install.sh | bash
+```
+
+This automatically:
+
+1. Downloads the ProfileCore binary
+2. Adds it to your PATH
+3. Runs the **interactive installer** to configure your shell
+4. Verifies the installation
+
+**Time: 2-3 minutes**
+
+### 🔧 Manual Installation
+
+Prefer to install manually? See [INSTALL.md](INSTALL.md) for:
+
+- Manual download + interactive install
+- Build from source
+- Detailed troubleshooting
+- Platform-specific instructions
+
+### ✅ Verify Installation
+
+After installation, restart your shell and run:
+
+```bash
+profilecore --version
+profilecore system info
+```
 
 ---
 
